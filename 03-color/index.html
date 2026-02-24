@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>颜色的来源 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.card::before{background:var(--c3);}
+.section h2{color:var(--c3);}
+.rgb-demo{display:flex;gap:12px;margin:20px 0;flex-wrap:wrap;}
+.rgb-box{
+  flex:1;min-width:120px;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:2px;padding:16px;text-align:center;
+}
+.rgb-swatch{width:48px;height:48px;border-radius:50%;margin:0 auto 10px;}
+.rgb-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted2);}
+.rgb-value{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);margin-top:4px;}
+.formula-box{
+  background:var(--surface);
+  border:1px solid rgba(201,138,184,0.2);
+  border-radius:2px;padding:20px 24px;margin:20px 0;
+  text-align:center;
+}
+.formula{
+  font-family:'JetBrains Mono',monospace;
+  font-size:16px;color:var(--c3);
+  letter-spacing:1px;margin-bottom:8px;
+}
+.formula-desc{font-size:12px;color:var(--muted2);}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 01 · 数字图像的本质</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 01 · 03 · COLOR</div>
+    <h1 class="page-title">颜色的<em>来源</em></h1>
+    <p class="page-desc">RGB 三通道如何组合成颜色，Y 亮度通道的意义，以及为什么 RAW 解码是调整颜色的唯一最佳时机。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">RGB CHANNELS</div>
+    <h2>RGB 三通道</h2>
+    <p>每个像素的颜色由三个数值共同决定，分别是红(R)、绿(G)、蓝(B)通道的亮度。三个数值叠加，产生最终颜色。</p>
+    <div class="rgb-demo">
+      <div class="rgb-box">
+        <div class="rgb-swatch" style="background:rgb(220,50,50)"></div>
+        <div class="rgb-label">纯红</div>
+        <div class="rgb-value">R=255 G=0 B=0</div>
+      </div>
+      <div class="rgb-box">
+        <div class="rgb-swatch" style="background:rgb(255,255,0)"></div>
+        <div class="rgb-label">黄色</div>
+        <div class="rgb-value">R=255 G=255 B=0</div>
+      </div>
+      <div class="rgb-box">
+        <div class="rgb-swatch" style="background:rgb(255,255,255)"></div>
+        <div class="rgb-label">纯白</div>
+        <div class="rgb-value">R=255 G=255 B=255</div>
+      </div>
+      <div class="rgb-box">
+        <div class="rgb-swatch" style="background:rgb(30,144,200)"></div>
+        <div class="rgb-label">天蓝</div>
+        <div class="rgb-value">R=30 G=144 B=200</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">LUMINANCE</div>
+    <h2>Y 亮度通道：人眼感知的权重</h2>
+    <p>Y 通道是按人眼感知权重混合的综合亮度值，不是简单的 RGB 平均。</p>
+    <div class="formula-box">
+      <div class="formula">Y = 0.299×R + 0.587×G + 0.114×B</div>
+      <div class="formula-desc">绿色权重最大（0.587），因为人眼对绿色最敏感；蓝色权重最小（0.114）</div>
+    </div>
+    <p>直方图里的 Y 通道就是用这个公式计算出来的，代表人眼感知到的整体明暗，比单独看 R/G/B 更直观。</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">DECODE OPPORTUNITY</div>
+    <h2>RAW 解码：调整颜色的唯一最佳时机</h2>
+    <p>RAW→RGB 的解码过程是唯一一次在<strong>传感器原始数据层面</strong>调整颜色的机会。这个时机做白平衡和曝光调整，效果最好，信息损失最小。</p>
+    <div class="cards">
+      <div class="card">
+        <h3>在 RAW 解码时调整（最佳）</h3>
+        <p>直接作用在传感器原始光量数据上，14bit 精度全程保留，白平衡调整只是改变 R/G/B 三个通道的缩放系数，没有任何信息损失。</p>
+      </div>
+      <div class="card">
+        <h3>解码后再调整（次优）</h3>
+        <p>输出成 TIFF 后再在 Photoshop 调色，已经是处理过的数据，精度打折，暗部调整容易出现色调分离。</p>
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-label">RAWPY · 解码时控制白平衡和曝光</div>
+      <pre>import rawpy
+
+with rawpy.imread("photo.ARW") as raw:
+    # 读取相机记录的白平衡系数
+    wb = raw.camera_whitebalance
+    print("相机白平衡系数:", wb)
+    # 例：[2518.0, 1024.0, 1570.0, 1024.0]
+    # 红色增益 2518/1024 = 2.46倍（场景偏冷，需要加红）
+
+    # 使用相机白平衡解码
+    img_camera_wb = raw.postprocess(use_camera_wb=True)
+
+    # 手动指定白平衡（日光色温）
+    img_daylight = raw.postprocess(use_auto_wb=False,
+        user_wb=[1.8, 1.0, 1.5, 1.0])
+
+    # 调整曝光（+1EV）
+    img_brighter = raw.postprocess(
+        use_camera_wb=True,
+        exp_shift=2.0   # 2.0 = +1EV，线性倍数
+    )</pre>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://en.wikipedia.org/wiki/Luma_(video)" target="_blank" class="resource-item">
+        <div class="resource-type">参考 · WIKIPEDIA</div>
+        <div class="resource-title">Luma (video) · Y通道原理</div>
+        <div class="resource-desc">详细解释 Y 亮度通道的计算公式和历史来源</div>
+      </a>
+      <a href="https://www.cambridgeincolour.com/tutorials/white-balance.htm" target="_blank" class="resource-item">
+        <div class="resource-type">教程 · CAMBRIDGE IN COLOUR</div>
+        <div class="resource-title">Understanding White Balance</div>
+        <div class="resource-desc">白平衡原理最清晰的图文教程，配合大量实图说明</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../02-sensor-raw/index.html" class="btn-nav">← 传感器与RAW</a>
+    <a href="../04-bit-depth/index.html" class="btn-nav">位深 →</a>
+  </div>
+</main>
+</body>
+</html>

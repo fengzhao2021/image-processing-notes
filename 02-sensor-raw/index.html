@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>传感器与RAW · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.card::before{background:var(--c2);}
+.section h2{color:var(--c2);}
+.bayer-grid{
+  display:inline-grid;
+  grid-template-columns:repeat(8,1fr);
+  gap:2px;margin:20px 0;
+}
+.bayer-cell{
+  width:38px;height:38px;
+  border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;font-weight:600;
+}
+.bayer-r{background:rgba(201,80,80,0.3);color:#e8a0a0;border:1px solid rgba(201,80,80,0.2);}
+.bayer-g{background:rgba(100,180,100,0.3);color:#a0d8a0;border:1px solid rgba(100,180,100,0.2);}
+.bayer-b{background:rgba(80,120,200,0.3);color:#a0b8e8;border:1px solid rgba(80,120,200,0.2);}
+.stats-row{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;margin:20px 0;
+}
+.stat-box{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;padding:16px;
+  text-align:center;
+}
+.stat-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:24px;font-weight:500;
+  color:var(--c2);margin-bottom:4px;
+}
+.stat-label{font-size:11px;color:var(--muted2);}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 01 · 数字图像的本质</div>
+</nav>
+
+<main class="main">
+
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 01 · 02 · SENSOR & RAW</div>
+    <h1 class="page-title">传感器与<em>RAW</em></h1>
+    <p class="page-desc">相机传感器如何把光转换成数字，RAW 文件里究竟存了什么，以及为什么同一张 ARW 不同软件解码出来颜色不同。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <!-- 光电转换 -->
+  <div class="section">
+    <div class="section-label">PHOTOELECTRIC CONVERSION</div>
+    <h2>传感器如何感受光</h2>
+    <p>传感器上布满了数千万个<strong>光电二极管</strong>，每一个对应一个像素位置。光照射到二极管上，二极管把光转换成电压，光越强电压越高。拍照结束后，相机把每个位置的电压值测量出来，转换成数字存进 ARW 文件。</p>
+    <p>关键点：传感器只能感受<strong>光的强弱</strong>，无法区分颜色。每个二极管看到的世界是黑白的。</p>
+    <div class="cards">
+      <div class="card">
+        <h3>索尼 14bit 传感器</h3>
+        <p>每个像素的光量用 14bit 数字表示，范围 0（完全无光）到 16383（最强光）。你的 A7 系列传感器共有约 3300 万个这样的测量点。</p>
+      </div>
+      <div class="card">
+        <h3>ARW 文件的核心内容</h3>
+        <p>3300 万个光量数字，每个 14bit，加上索尼无损压缩，最终文件约 33MB。这些原始数据没有颜色，没有白平衡，没有 Gamma，是最纯粹的传感器记录。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 拜耳阵列 -->
+  <div class="section">
+    <div class="section-label">BAYER ARRAY</div>
+    <h2>拜耳阵列：给传感器装上颜色滤镜</h2>
+    <p>1976年柯达工程师 Bryce Bayer 发明了解决方案：在传感器上覆盖一层彩色滤镜阵列，每个像素上方只有一种颜色的滤镜，红色滤镜只让红光通过，绿色只让绿光通过，蓝色只让蓝光通过。</p>
+
+    <div class="bayer-grid">
+      <!-- 4x8 拜耳阵列示意 -->
+      <div class="bayer-cell bayer-r">R</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-r">R</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-r">R</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-r">R</div><div class="bayer-cell bayer-g">G</div>
+      <div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-b">B</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-b">B</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-b">B</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-b">B</div>
+      <div class="bayer-cell bayer-r">R</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-r">R</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-r">R</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-r">R</div><div class="bayer-cell bayer-g">G</div>
+      <div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-b">B</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-b">B</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-b">B</div><div class="bayer-cell bayer-g">G</div><div class="bayer-cell bayer-b">B</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val" style="color:#a0d8a0">50%</div>
+        <div class="stat-label">绿色像素占比</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" style="color:#e8a0a0">25%</div>
+        <div class="stat-label">红色像素占比</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" style="color:#a0b8e8">25%</div>
+        <div class="stat-label">蓝色像素占比</div>
+      </div>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">为什么绿色是红蓝的两倍</div>
+      <p>人眼对绿色最敏感，绿色通道承担了主要的亮度和细节信息。多采样一倍的绿色，能让图像更清晰，细节还原更准确，颜色感知更接近人眼。这不是让照片"更绿"，而是让照片"更清晰"。</p>
+    </div>
+  </div>
+
+  <!-- 去马赛克 -->
+  <div class="section">
+    <div class="section-label">DEMOSAICING</div>
+    <h2>去马赛克：推算出完整颜色</h2>
+    <p>拜耳阵列导致每个像素只有一种颜色的数据，ARW 文件里每个像素只有 R 或 G 或 B 其中一个值。去马赛克就是利用周围像素的数据，<strong>插值推算</strong>出每个位置完整的 RGB 三个值。</p>
+    <p>这个推算的颜色不是直接测量到的，是<strong>近似值</strong>。在颜色均匀的区域误差很小，在边缘和细节处误差较大。</p>
+
+    <div class="cards">
+      <div class="card">
+        <h3>双线性插值（默认）</h3>
+        <p>取周围同色像素的加权平均值。速度快，质量一般，rawpy 的默认算法。</p>
+      </div>
+      <div class="card">
+        <h3>AHD 自适应同色差值（推荐）</h3>
+        <p>先分析边缘方向，沿边缘方向插值而不是跨越边缘。边缘更锐利，颜色更准确，速度略慢但质量明显更好。ARW Stacker 升级目标。</p>
+      </div>
+      <div class="card">
+        <h3>DCB（高质量模式）</h3>
+        <p>同时分析多个通道之间的相关性，互相验证提高精度。质量最好，计算量最大。可作为工具的可选高质量模式。</p>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">RAWPY · 指定去马赛克算法</div>
+      <pre>import rawpy
+
+with rawpy.imread("photo.ARW") as raw:
+    # 默认：双线性插值
+    img_default = raw.postprocess(use_camera_wb=True)
+
+    # 推荐：AHD 算法
+    img_ahd = raw.postprocess(
+        use_camera_wb=True,
+        demosaic_algorithm=rawpy.DemosaicAlgorithm.AHD
+    )
+
+    # 高质量：DCB 算法
+    img_dcb = raw.postprocess(
+        use_camera_wb=True,
+        demosaic_algorithm=rawpy.DemosaicAlgorithm.DCB
+    )</pre>
+    </div>
+  </div>
+
+  <!-- 色彩伪影 -->
+  <div class="section">
+    <div class="section-label">COLOR FRINGING</div>
+    <h2>色彩伪影：采样不均的代价</h2>
+    <p>拜耳阵列绿色采样是红蓝的两倍，加上去马赛克的推算误差，在<strong>高对比度边缘</strong>（如逆光树枝）会出现紫色或绿色的细线，这就是色彩伪影。</p>
+    <div class="cards">
+      <div class="card">
+        <h3>色彩伪影 vs 紫边 vs 光晕</h3>
+        <p><strong>色彩伪影</strong>：传感器+算法问题，边缘出现颜色偏差。<br><strong>紫边</strong>：镜头色散，光学问题，不同波长折射角度不同。<br><strong>光晕</strong>：强光在镜片内部反射，纯光学问题。<br>三者都在边缘出现，但原因完全不同。</p>
+      </div>
+      <div class="card">
+        <h3>解决方法</h3>
+        <p>Lightroom 的"去色差"功能同时处理色彩伪影和紫边。换用更好的去马赛克算法（AHD/DCB）可以减少色彩伪影。光晕只能靠遮光罩和使用更好的镜头解决。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 暗电流 -->
+  <div class="section">
+    <div class="section-label">DARK CURRENT NOISE</div>
+    <h2>暗电流噪声：传感器的底噪</h2>
+    <p>即使完全遮光，传感器也会因为热运动产生随机电信号，这就是暗电流噪声。温度越高，热运动越剧烈，噪声越强。</p>
+
+    <div class="data-box">
+      <div class="data-label">亲测实验数据 · 镜头盖照片分析</div>
+      <pre>
+文件：DSC08103.ARW（盖着镜头盖拍摄）
+
+平均亮度值：4065 / 65535（约 6.2%，不是零！）
+最大亮度值：45881（噪声峰值，约总范围70%）
+95%像素低于：11089
+
+亮度值分布（前几个）：
+  亮度值     0 →  8,125,990 个像素
+  亮度值   384 →    703,886 个像素  ← 步长384
+  亮度值   768 →    841,226 个像素  ← 索尼量化特征
+  亮度值  1152 →  1,134,874 个像素</pre>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">天文摄影的解决方案：暗场校正</div>
+      <p>拍完正片后立刻盖上镜头盖，用相同 ISO 和快门拍 10-20 张暗场，取平均后从正片中减去，消除暗电流噪声的影响。必须现场拍，因为暗电流和 ISO、快门时间、温度强绑定，没有通用暗场库。</p>
+    </div>
+  </div>
+
+  <!-- 索尼量化 -->
+  <div class="section">
+    <div class="section-label">SONY QUANTIZATION</div>
+    <h2>索尼 ARW 的量化压缩特性</h2>
+    <p>索尼 ARW 不是真正的无损压缩，而是<strong>有损量化 + 无损编码</strong>的组合。传感器原始 14bit 数据经过量化，亮度值步长约 384，实际只保留约 7729 种不同亮度值（理论应有 65536 种）。</p>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val">55MB</div>
+        <div class="stat-label">理论文件大小</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">33MB</div>
+        <div class="stat-label">实际文件大小</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val">7729</div>
+        <div class="stat-label">实际亮度种类</div>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">对天文摄影的影响</div>
+      <p>星云信息集中在低亮度区域（0-2000），量化步长 384 在这里只有 5-6 个梯度。大幅提亮后会出现色调分离（Banding）。解决方法：ETTR 向右曝光，把星云信息推入梯度更密集的中高亮度区域。</p>
+    </div>
+  </div>
+
+  <!-- 资料 -->
+  <div class="resources">
+    <div class="resources-header">
+      <h2>推荐学习资料</h2>
+    </div>
+    <div class="resource-grid">
+      <a href="https://www.libraw.org/docs/API-overview.html" target="_blank" class="resource-item">
+        <div class="resource-type">官方文档 · LIBRAW</div>
+        <div class="resource-title">LibRaw API Overview</div>
+        <div class="resource-desc">rawpy 的底层库，了解 RAW 解码的完整参数说明</div>
+      </a>
+      <a href="https://rawpedia.rawtherapee.com/Demosaicing" target="_blank" class="resource-item">
+        <div class="resource-type">技术文档 · RAWPEDIA</div>
+        <div class="resource-title">Demosaicing Algorithms</div>
+        <div class="resource-desc">详细比较各种去马赛克算法的优缺点和适用场景</div>
+      </a>
+      <a href="https://github.com/letmaik/rawpy" target="_blank" class="resource-item">
+        <div class="resource-type">开源库 · RAWPY</div>
+        <div class="resource-title">rawpy GitHub 仓库</div>
+        <div class="resource-desc">查看所有可用的 postprocess 参数，包括去马赛克算法列表</div>
+      </a>
+      <a href="https://www.dpreview.com/articles/2666934640/sensorsizes" target="_blank" class="resource-item">
+        <div class="resource-type">科普文章 · DPREVIEW</div>
+        <div class="resource-title">Understanding Sensor Sizes</div>
+        <div class="resource-desc">传感器尺寸和画质的关系，为什么面积比像素数量重要</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../01-image-array/index.html" class="btn-nav">← 图像是数组</a>
+    <a href="../03-color/index.html" class="btn-nav">颜色的来源 →</a>
+  </div>
+
+</main>
+</body>
+</html>

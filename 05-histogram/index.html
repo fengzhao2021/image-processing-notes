@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>直方图 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.card::before{background:var(--c5);}
+.section h2{color:var(--c5);}
+.hist-demo{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:2px;padding:20px;margin:20px 0;
+}
+.hist-canvas{width:100%;height:120px;position:relative;display:flex;align-items:flex-end;gap:1px;}
+.hist-bar{background:rgba(201,122,122,0.5);border-radius:1px 1px 0 0;flex:1;transition:height 0.3s;}
+.hist-axis{
+  display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);
+  margin-top:6px;padding:0 2px;
+}
+.hist-label{text-align:center;font-size:10px;color:var(--muted2);margin-top:8px;}
+.exposure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0;}
+.exp-box{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:2px;padding:14px;
+}
+.exp-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.exp-desc{font-size:11px;color:var(--muted2);line-height:1.6;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 01 · 数字图像的本质</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 01 · 05 · HISTOGRAM</div>
+    <h1 class="page-title"><em>直方图</em></h1>
+    <p class="page-desc">直方图是照片亮度分布的可视化，学会读直方图就能准确判断曝光，并掌握 ETTR 向右曝光的星空摄影技巧。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">WHAT IS A HISTOGRAM</div>
+    <h2>直方图是什么</h2>
+    <p>横轴代表亮度值（0 纯黑 → 255 纯白），纵轴代表该亮度的像素数量。峰越高说明该亮度的像素越多。3300 万个像素，每个像素按亮度值分到 256 个桶里，直方图就是这 256 个桶的高度图。</p>
+
+    <div class="hist-demo">
+      <div class="hist-canvas" id="histCanvas"></div>
+      <div class="hist-axis">
+        <span>0 · 纯黑</span><span>64</span><span>128 · 中间</span><span>192</span><span>255 · 纯白</span>
+      </div>
+      <div class="hist-label">↑ 示意图：正常曝光的直方图（中间调为主，两端不溢出）</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">READING EXPOSURE</div>
+    <h2>用直方图判断曝光</h2>
+    <div class="exposure-grid">
+      <div class="exp-box">
+        <div class="exp-title" style="color:var(--c6)">整体偏左 → 欠曝</div>
+        <div class="exp-desc">大部分像素集中在暗部，亮部空旷。照片整体偏暗，暗部细节损失。</div>
+      </div>
+      <div class="exp-box">
+        <div class="exp-title" style="color:var(--c2)">分布均匀 → 正常</div>
+        <div class="exp-desc">像素分布在整个亮度范围，峰值在中间调附近，高光和阴影都有细节。</div>
+      </div>
+      <div class="exp-box">
+        <div class="exp-title" style="color:var(--c5)">右边贴墙 → 过曝</div>
+        <div class="exp-desc">亮度值达到 255 出现竖墙（高光溢出），这部分数据永久丢失，无法恢复。</div>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">调曝光的本质</div>
+      <p>调整曝光就是把直方图整体左右平移。提亮是向右移，压暗是向左移。关键是不要让右边出现竖墙（高光溢出），溢出的数据无法恢复。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">ETTR</div>
+    <h2>ETTR 向右曝光：星空摄影核心技巧</h2>
+    <p>索尼 ARW 的量化步长在低亮度区域约 384，星云信息集中在 0-2000 范围，只有 5-6 个梯度。ETTR 故意增加曝光，让直方图整体右移，把星云信息推入梯度更密集的中高亮度区域，后期再压回来。</p>
+    <div class="cards">
+      <div class="card">
+        <h3>操作步骤</h3>
+        <p>1. 拍一张测试曝光<br>2. 打开相机斑马纹（高光警告）<br>3. 逐步 +0.3EV → +0.7EV → +1EV<br>4. 斑马纹刚好出现时退回一档<br>5. 这就是最优 ETTR 曝光值</p>
+      </div>
+      <div class="card">
+        <h3>注意事项</h3>
+        <p>右边绝对不能出现竖墙（高光溢出）。明亮星星和月亮最容易溢出，要重点监视。斑马纹是最直观的溢出警告工具。ETTR 主要用于星空和夜景长曝光，普通日常摄影用不到。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CODE</div>
+    <h2>用代码读取直方图数据</h2>
+    <div class="code-block">
+      <div class="code-label">PYTHON · 分析直方图分布</div>
+      <pre>import rawpy, numpy as np
+
+with rawpy.imread("photo.ARW") as raw:
+    img = raw.postprocess(output_bps=16, use_camera_wb=True)
+    gray = np.mean(img, axis=2).astype(np.uint32)
+
+print("平均亮度:", round(gray.mean(), 2), "/ 65535")
+print("最大亮度:", gray.max())
+print("95%像素低于:", np.percentile(gray, 95))
+
+# 统计亮度分布
+unique, counts = np.unique(gray, return_counts=True)
+print(f"共 {len(unique)} 种不同亮度值")</pre>
+    </div>
+    <div class="data-box">
+      <div class="data-label">亲测数据 · 镜头盖照片（暗场）</div>
+      <pre>
+平均亮度值：4065 / 65535（约6.2%）
+最大亮度值：45881（暗电流噪声峰值）
+95%像素低于：11089
+共 7729 种不同亮度值（量化压缩特征）</pre>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://www.cambridgeincolour.com/tutorials/histograms1.htm" target="_blank" class="resource-item">
+        <div class="resource-type">教程 · CAMBRIDGE IN COLOUR</div>
+        <div class="resource-title">Understanding Histograms</div>
+        <div class="resource-desc">最全面的直方图教程，配合大量实例图片，强烈推荐</div>
+      </a>
+      <a href="https://petapixel.com/2012/05/28/expose-to-the-right-ettr-to-capture-the-best-possible-image/" target="_blank" class="resource-item">
+        <div class="resource-type">文章 · PETAPIXEL</div>
+        <div class="resource-title">Expose to the Right (ETTR)</div>
+        <div class="resource-desc">ETTR 技巧详解，原理和实际操作都讲得很清楚</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../04-bit-depth/index.html" class="btn-nav">← 位深</a>
+    <a href="../06-color-space/index.html" class="btn-nav">色彩空间 →</a>
+  </div>
+</main>
+
+<script>
+const canvas = document.getElementById('histCanvas');
+const heights = [2,3,3,4,5,5,6,8,10,12,15,18,22,28,35,42,50,58,65,70,75,78,82,85,88,90,92,93,95,96,98,99,100,99,98,96,94,91,88,84,80,75,70,65,60,55,50,46,42,38,35,32,29,26,23,21,19,17,15,14,13,12,11,10];
+heights.forEach(h => {
+  const bar = document.createElement('div');
+  bar.className = 'hist-bar';
+  bar.style.height = h + '%';
+  canvas.appendChild(bar);
+});
+</script>
+</body>
+</html>

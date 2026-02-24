@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gamma曲线 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.card::before{background:var(--c7);}
+.section h2{color:var(--c7);}
+.gamma-table{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:2px;overflow:hidden;margin:20px 0;
+}
+.gamma-table table{width:100%;border-collapse:collapse;}
+.gamma-table th{
+  background:rgba(184,168,126,0.1);padding:10px 14px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:2px;color:var(--c7);text-align:left;
+  border-bottom:1px solid var(--border2);
+}
+.gamma-table td{
+  padding:10px 14px;font-size:12px;color:var(--muted2);
+  border-bottom:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;
+}
+.gamma-table td:first-child{color:var(--text);}
+.gamma-table tr:last-child td{border-bottom:none;}
+.flow-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0;}
+.flow-box{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:2px;padding:16px;
+}
+.flow-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px;}
+.flow-item{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;color:var(--muted2);
+  padding:6px 0;border-bottom:1px solid var(--border);
+}
+.flow-item:last-child{border-bottom:none;}
+.flow-arrow2{color:var(--c7);font-size:10px;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 01 · 数字图像的本质</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 01 · 07 · GAMMA</div>
+    <h1 class="page-title">Gamma<em>曲线</em></h1>
+    <p class="page-desc">人眼感知亮度是非线性的，传感器记录是线性的，Gamma 曲线弥补这个差距。理解 Gamma 才能理解为什么 RAW 后期空间比 JPEG 大，以及天文摄影为什么必须在线性空间做运算。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">THE PROBLEM</div>
+    <h2>传感器和人眼的矛盾</h2>
+    <p>传感器记录光量是<strong>线性的</strong>：进来两倍的光，记录的数值就是两倍，完全按物理规律来。</p>
+    <p>人眼感知亮度是<strong>非线性的</strong>：在黑暗房间点一根蜡烛感觉很亮，再加第十根几乎没感觉。对暗部变化极度敏感，对亮部变化迟钝。这是人类进化出来的生存本能。</p>
+    <div class="insight">
+      <div class="insight-label">矛盾的后果</div>
+      <p>传感器线性记录的数据直接显示出来，暗部显得太暗，亮部细节区分不开，整体感觉"不自然"。需要 Gamma 校正把数据映射成符合人眼感知的样子。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">GAMMA MATH</div>
+    <h2>Gamma 的数学本质</h2>
+    <p>Gamma 是一个幂函数，标准值 2.2：</p>
+    <div class="code-block">
+      <div class="code-label">FORMULA</div>
+      <pre>输出值 = 输入值 ^ (1 / Gamma)
+       = 输入值 ^ (1 / 2.2)
+       = 输入值 ^ 0.454</pre>
+    </div>
+    <p>效果是暗部数值被拉高，亮部数值几乎不变，整体符合人眼感知分布。</p>
+
+    <div class="gamma-table">
+      <table>
+        <tr><th>线性值（传感器）</th><th>Gamma 2.2 校正后</th><th>放大倍数</th></tr>
+        <tr><td>0.01（极暗）</td><td>0.10</td><td>暗部放大 10×</td></tr>
+        <tr><td>0.10</td><td>0.35</td><td>暗部放大 3.5×</td></tr>
+        <tr><td>0.50（中间调）</td><td>0.73</td><td>略微提升</td></tr>
+        <tr><td>0.90（亮部）</td><td>0.95</td><td>几乎不变</td></tr>
+        <tr><td>1.00（最亮）</td><td>1.00</td><td>不变</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">COMPLETE PIPELINE</div>
+    <h2>图像从拍摄到显示的完整 Gamma 流程</h2>
+    <div class="flow-compare">
+      <div class="flow-box">
+        <div class="flow-title">普通摄影流程</div>
+        <div class="flow-item"><span class="flow-arrow2">①</span>传感器线性采集</div>
+        <div class="flow-item"><span class="flow-arrow2">②</span>RAW 解码时应用 Gamma 编码</div>
+        <div class="flow-item"><span class="flow-arrow2">③</span>存入 TIFF/JPEG（已包含 Gamma）</div>
+        <div class="flow-item"><span class="flow-arrow2">④</span>屏幕解码 Gamma 显示</div>
+      </div>
+      <div class="flow-box">
+        <div class="flow-title">天文摄影流程（必须线性空间）</div>
+        <div class="flow-item"><span class="flow-arrow2">①</span>传感器线性采集</div>
+        <div class="flow-item"><span class="flow-arrow2">②</span>RAW 解码，<strong>去掉 Gamma</strong></div>
+        <div class="flow-item"><span class="flow-arrow2">③</span>在线性空间做叠加/暗场减法</div>
+        <div class="flow-item"><span class="flow-arrow2">④</span>运算完成后<strong>加回 Gamma</strong></div>
+        <div class="flow-item"><span class="flow-arrow2">⑤</span>屏幕解码 Gamma 显示</div>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">为什么天文叠加必须在线性空间</div>
+      <p>叠加是对每个像素取平均值，这个运算必须在线性数据上做才正确。如果在 Gamma 空间里做平均，暗部数值被 Gamma 拉伸后的平均值会偏高，叠加结果失真。张数越多，误差积累越大，最终星云亮度分布会失真。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">GAMMA VS EXPOSURE</div>
+    <h2>Gamma 调整 vs 曝光调整的区别</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>曝光调整（线性乘法）</h3>
+        <p>所有像素值等比例乘以系数，整体平移。提亮时高光容易溢出，因为亮部和暗部同等放大。Lightroom 的曝光滑块是这个原理。</p>
+      </div>
+      <div class="card">
+        <h3>Gamma 调整（幂运算）</h3>
+        <p>暗部放大幅度大，亮部放大幅度小，符合人眼感知。不容易造成高光溢出。Lightroom 的"阴影"滑块更接近这个原理，这就是为什么提阴影比提曝光更安全。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CODE</div>
+    <h2>rawpy 中的 Gamma 控制</h2>
+    <div class="code-block">
+      <div class="code-label">RAWPY · Gamma 参数</div>
+      <pre>import rawpy
+
+with rawpy.imread("photo.ARW") as raw:
+    # 默认：应用 sRGB Gamma
+    img_default = raw.postprocess(use_camera_wb=True)
+
+    # 线性输出（天文摄影叠加用）：关闭 Gamma
+    img_linear = raw.postprocess(
+        use_camera_wb=True,
+        gamma=(1, 1),    # (power, toe_slope) = 线性
+        no_auto_bright=True,
+        output_bps=16
+    )
+
+    # 标准 Gamma 2.2
+    img_gamma22 = raw.postprocess(
+        use_camera_wb=True,
+        gamma=(2.222, 4.5),   # Rec.709 标准
+        output_bps=16
+    )</pre>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://www.cambridgeincolour.com/tutorials/gamma-correction.htm" target="_blank" class="resource-item">
+        <div class="resource-type">教程 · CAMBRIDGE IN COLOUR</div>
+        <div class="resource-title">Understanding Gamma Correction</div>
+        <div class="resource-desc">Gamma 最直观的图文解释，有交互式演示，强烈推荐</div>
+      </a>
+      <a href="https://blog.johnnovak.net/2016/09/21/what-every-coder-should-know-about-gamma/" target="_blank" class="resource-item">
+        <div class="resource-type">深度文章 · BLOG</div>
+        <div class="resource-title">What Every Coder Should Know About Gamma</div>
+        <div class="resource-desc">程序员视角详解 Gamma，讲了很多日常开发中 Gamma 引起 bug 的案例</div>
+      </a>
+      <a href="https://astrobackyard.com/astrophotography-dark-frames/" target="_blank" class="resource-item">
+        <div class="resource-type">天文摄影 · 实践</div>
+        <div class="resource-title">How to Use Dark Frames in Astrophotography</div>
+        <div class="resource-desc">暗场校正的完整实践教程，包含拍摄方法和后期处理步骤</div>
+      </a>
+      <a href="https://en.wikipedia.org/wiki/Gamma_correction" target="_blank" class="resource-item">
+        <div class="resource-type">参考 · WIKIPEDIA</div>
+        <div class="resource-title">Gamma Correction</div>
+        <div class="resource-desc">Gamma 的完整技术背景，包含历史、数学推导和各种标准的参数</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../06-color-space/index.html" class="btn-nav">← 色彩空间</a>
+    <a href="../index.html" class="btn-nav">返回主页 →</a>
+  </div>
+</main>
+</body>
+</html>

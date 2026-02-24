@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图像处理知识库</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+body{padding-top:0;}
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  text-align:center;
+  padding:60px 40px;
+  position:relative;
+}
+.hero::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse at 25% 30%,rgba(126,184,201,0.04) 0%,transparent 55%),
+    radial-gradient(ellipse at 75% 70%,rgba(201,168,76,0.04) 0%,transparent 55%);
+  pointer-events:none;
+}
+.hero-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:5px;
+  color:var(--gold-dim);margin-bottom:20px;
+}
+.hero h1{
+  font-size:clamp(32px,5vw,64px);
+  font-weight:300;letter-spacing:4px;
+  line-height:1.15;margin-bottom:20px;
+}
+.hero h1 em{font-style:normal;color:var(--gold);}
+.hero-desc{
+  font-size:15px;color:var(--muted2);
+  max-width:500px;line-height:1.9;
+  margin-bottom:50px;
+}
+.hero-line{
+  width:1px;height:50px;
+  background:linear-gradient(to bottom,var(--gold-dim),transparent);
+  margin:0 auto 50px;
+}
+
+/* Progress bar */
+.progress-bar{
+  display:flex;gap:4px;margin-bottom:60px;
+}
+.progress-seg{
+  height:3px;border-radius:2px;flex:1;
+  background:var(--border2);
+}
+.progress-seg.done{background:var(--gold-dim);}
+.progress-seg.current{background:var(--gold);}
+
+/* Layer indicator */
+.layer-badge{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;padding:8px 18px;
+  margin-bottom:60px;
+}
+.layer-badge-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--c2);
+  box-shadow:0 0 8px var(--c2);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.layer-badge-text{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:2px;
+  color:var(--muted2);
+}
+
+/* Tree grid */
+.tree-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  max-width:1100px;
+  width:100%;
+  margin:0 auto;
+}
+.tree-card{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;
+  padding:20px 16px;
+  text-decoration:none;
+  text-align:left;
+  transition:all 0.25s;
+  position:relative;
+  display:block;
+}
+.tree-card:hover{
+  border-color:var(--muted);
+  transform:translateY(-2px);
+}
+.tree-card::before{
+  content:'';position:absolute;
+  left:0;top:0;bottom:0;width:3px;
+  border-radius:2px 0 0 2px;
+  transition:opacity 0.2s;
+}
+.tree-card:hover::before{opacity:1;}
+
+.card-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:3px;
+  margin-bottom:10px;opacity:0.6;
+}
+.card-title{
+  font-size:14px;font-weight:600;
+  color:var(--text);margin-bottom:8px;
+  line-height:1.3;
+}
+.card-desc{
+  font-size:11px;color:var(--muted2);
+  line-height:1.6;margin-bottom:14px;
+}
+.card-tags{display:flex;flex-wrap:wrap;gap:4px;}
+.tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;letter-spacing:1px;
+  padding:2px 7px;
+  background:var(--border);
+  border-radius:2px;
+  color:var(--muted2);
+}
+.tag.verified{color:var(--c2);background:rgba(168,201,138,0.1);}
+.tag.tool{color:var(--gold);background:rgba(201,168,76,0.1);}
+
+.c1-theme .tree-card::before,.c1-theme .card-num{color:var(--c1);}
+.c1-theme .tree-card::before{background:var(--c1);}
+.c2-theme .tree-card::before{background:var(--c2);}
+.c2-theme .card-num{color:var(--c2);}
+.c3-theme .tree-card::before{background:var(--c3);}
+.c3-theme .card-num{color:var(--c3);}
+.c4-theme .tree-card::before{background:var(--c4);}
+.c4-theme .card-num{color:var(--c4);}
+.c5-theme .tree-card::before{background:var(--c5);}
+.c5-theme .card-num{color:var(--c5);}
+.c6-theme .tree-card::before{background:var(--c6);}
+.c6-theme .card-num{color:var(--c6);}
+.c7-theme .tree-card::before{background:var(--c7);}
+.c7-theme .card-num{color:var(--c7);}
+
+/* Layer section */
+.layer-section{width:100%;max-width:1100px;margin:60px auto 0;text-align:left;}
+.layer-header{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:20px;padding-bottom:16px;
+  border-bottom:1px solid var(--border2);
+}
+.layer-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:3px;
+  color:var(--gold-dim);
+}
+.layer-name{font-size:16px;font-weight:600;color:var(--text);}
+.layer-status{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:2px;
+  padding:3px 10px;
+  border-radius:2px;
+  margin-left:auto;
+}
+.layer-status.complete{
+  background:rgba(168,201,138,0.1);
+  color:var(--c2);border:1px solid rgba(168,201,138,0.2);
+}
+.layer-status.in-progress{
+  background:rgba(201,168,76,0.1);
+  color:var(--gold);border:1px solid rgba(201,168,76,0.2);
+}
+.layer-status.pending{
+  background:var(--surface);
+  color:var(--muted);border:1px solid var(--border2);
+}
+
+/* Footer */
+.footer{
+  margin-top:100px;padding:30px 40px;
+  border-top:1px solid var(--border2);
+  text-align:center;
+}
+.footer-text{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:2px;
+  color:var(--muted);
+}
+
+@media(max-width:900px){.tree-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.tree-grid{grid-template-columns:1fr;}.hero{padding:60px 20px;}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">赵师傅 · 图像处理自学笔记</div>
+  <h1>图像处理<br><em>知识体系</em></h1>
+  <p class="hero-desc">从 RAW 文件到算法实战，系统梳理图像处理五层知识，结合 ARW Stacker 工具开发实践。</p>
+  <div class="hero-line"></div>
+
+  <div class="layer-badge">
+    <div class="layer-badge-dot"></div>
+    <div class="layer-badge-text">当前进度：Layer 01 已完成 · Layer 02 学习中</div>
+  </div>
+
+  <!-- Layer 1 -->
+  <div class="layer-section">
+    <div class="layer-header">
+      <div class="layer-num">LAYER 01</div>
+      <div class="layer-name">数字图像的本质</div>
+      <div class="layer-status complete">已完成</div>
+    </div>
+    <div class="tree-grid">
+      <div class="c1-theme">
+        <a href="01-image-array/index.html" class="tree-card">
+          <div class="card-num">01 · IMAGE</div>
+          <div class="card-title">图像是数组</div>
+          <div class="card-desc">三维数组结构，像素即数字，所有处理本质是数学运算</div>
+          <div class="card-tags"><span class="tag verified">亲测验证</span></div>
+        </a>
+      </div>
+      <div class="c2-theme">
+        <a href="02-sensor-raw/index.html" class="tree-card">
+          <div class="card-num">02 · SENSOR</div>
+          <div class="card-title">传感器与RAW</div>
+          <div class="card-desc">光电转换、拜耳阵列、去马赛克、色彩伪影、暗电流噪声</div>
+          <div class="card-tags"><span class="tag verified">亲测验证</span><span class="tag tool">工具相关</span></div>
+        </a>
+      </div>
+      <div class="c3-theme">
+        <a href="03-color/index.html" class="tree-card">
+          <div class="card-num">03 · COLOR</div>
+          <div class="card-title">颜色的来源</div>
+          <div class="card-desc">RGB通道、Y亮度、RAW解码的唯一机会</div>
+          <div class="card-tags"><span class="tag tool">工具相关</span></div>
+        </a>
+      </div>
+      <div class="c4-theme">
+        <a href="04-bit-depth/index.html" class="tree-card">
+          <div class="card-num">04 · BIT</div>
+          <div class="card-title">位深</div>
+          <div class="card-desc">bit原理、8/14/16bit区别、索尼量化压缩、无损压缩原理</div>
+          <div class="card-tags"><span class="tag verified">亲测验证</span><span class="tag tool">工具相关</span></div>
+        </a>
+      </div>
+      <div class="c5-theme">
+        <a href="05-histogram/index.html" class="tree-card">
+          <div class="card-num">05 · HISTOGRAM</div>
+          <div class="card-title">直方图</div>
+          <div class="card-desc">亮度分布可视化、判断曝光、ETTR向右曝光技巧</div>
+          <div class="card-tags"><span class="tag verified">亲测验证</span><span class="tag tool">工具相关</span></div>
+        </a>
+      </div>
+      <div class="c6-theme">
+        <a href="06-color-space/index.html" class="tree-card">
+          <div class="card-num">06 · COLOR SPACE</div>
+          <div class="card-title">色彩空间</div>
+          <div class="card-desc">sRGB/Adobe RGB/ProPhoto、数字与颜色的对应标准</div>
+          <div class="card-tags"><span class="tag tool">工具相关</span></div>
+        </a>
+      </div>
+      <div class="c7-theme">
+        <a href="07-gamma/index.html" class="tree-card">
+          <div class="card-num">07 · GAMMA</div>
+          <div class="card-title">Gamma曲线</div>
+          <div class="card-desc">人眼非线性感知、Gamma 2.2、线性空间处理</div>
+          <div class="card-tags"><span class="tag tool">工具相关</span></div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layer 2 -->
+  <div class="layer-section" style="margin-top:40px">
+    <div class="layer-header">
+      <div class="layer-num">LAYER 02</div>
+      <div class="layer-name">经典图像处理算法</div>
+      <div class="layer-status in-progress">学习中</div>
+    </div>
+    <div class="tree-grid">
+      <div style="opacity:0.5">
+        <div class="tree-card" style="cursor:default;pointer-events:none;">
+          <div class="card-num" style="color:var(--muted)">01 · FILTER</div>
+          <div class="card-title">滤波</div>
+          <div class="card-desc">卷积核、高斯模糊、锐化</div>
+          <div class="card-tags"><span class="tag">即将开始</span></div>
+        </div>
+      </div>
+      <div style="opacity:0.5">
+        <div class="tree-card" style="cursor:default;pointer-events:none;">
+          <div class="card-num" style="color:var(--muted)">02 · EDGE</div>
+          <div class="card-title">边缘检测</div>
+          <div class="card-desc">Sobel、Canny算法</div>
+          <div class="card-tags"><span class="tag">即将开始</span></div>
+        </div>
+      </div>
+      <div style="opacity:0.5">
+        <div class="tree-card" style="cursor:default;pointer-events:none;">
+          <div class="card-num" style="color:var(--muted)">03 · ALIGN</div>
+          <div class="card-title">图像对齐</div>
+          <div class="card-desc">ECC算法、手持包围曝光对齐</div>
+          <div class="card-tags"><span class="tag">即将开始</span></div>
+        </div>
+      </div>
+      <div style="opacity:0.5">
+        <div class="tree-card" style="cursor:default;pointer-events:none;">
+          <div class="card-num" style="color:var(--muted)">04 · GHOST</div>
+          <div class="card-title">去鬼影</div>
+          <div class="card-desc">运动检测、HDR合成</div>
+          <div class="card-tags"><span class="tag">即将开始</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layer 3-5 placeholder -->
+  <div class="layer-section" style="margin-top:40px">
+    <div class="layer-header">
+      <div class="layer-num">LAYER 03</div>
+      <div class="layer-name">计算摄影</div>
+      <div class="layer-status pending">待开始</div>
+    </div>
+  </div>
+  <div class="layer-section" style="margin-top:20px">
+    <div class="layer-header">
+      <div class="layer-num">LAYER 04</div>
+      <div class="layer-name">传统机器学习</div>
+      <div class="layer-status pending">待开始</div>
+    </div>
+  </div>
+  <div class="layer-section" style="margin-top:20px">
+    <div class="layer-header">
+      <div class="layer-num">LAYER 05</div>
+      <div class="layer-name">深度学习</div>
+      <div class="layer-status pending">待开始</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-text">图像处理知识库 · 持续更新中 · ARW Stacker 工具开发配套笔记</div>
+</div>
+
+</body>
+</html>

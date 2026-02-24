@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>色彩空间 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.card::before{background:var(--c6);}
+.section h2{color:var(--c6);}
+.space-compare{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0;}
+.space-box{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:2px;padding:16px;
+}
+.space-name{font-size:15px;font-weight:600;margin-bottom:6px;}
+.space-range{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);margin-bottom:8px;}
+.space-use{font-size:11px;color:var(--muted2);line-height:1.6;}
+.space-bar{height:4px;border-radius:2px;margin-bottom:10px;}
+.pipeline{
+  display:flex;flex-direction:column;gap:8px;margin:20px 0;
+}
+.pipe-step{
+  display:flex;align-items:center;gap:14px;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:2px;padding:12px 16px;
+}
+.pipe-icon{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--c6);
+  min-width:80px;letter-spacing:1px;
+}
+.pipe-text{font-size:13px;color:var(--muted2);}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 01 · 数字图像的本质</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 01 · 06 · COLOR SPACE</div>
+    <h1 class="page-title"><em>色彩空间</em></h1>
+    <p class="page-desc">sRGB、Adobe RGB、ProPhoto RGB 分别是什么，为什么同样的数值在不同标准下代表不同颜色，以及工具应该默认输出哪种。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">WHAT IS COLOR SPACE</div>
+    <h2>色彩空间是定义数字和颜色对应关系的标准</h2>
+    <p>同样的 RGB(0, 255, 0)，在 sRGB 里是普通绿色，在 Adobe RGB 里是更鲜艳的绿色。数字相同但颜色不同，因为用的标准（尺子）不同。色彩空间就是这把尺子，定义了每个数值对应哪种具体的颜色。</p>
+    <p><strong>RAW 文件本身没有色彩空间</strong>，因为它存的是传感器原始光量数据，不是颜色值。色彩空间是解码时才选择的，这正是 RAW 比 JPEG 灵活的核心优势之一。</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">THREE STANDARDS</div>
+    <h2>三种主要色彩空间</h2>
+    <div class="space-compare">
+      <div class="space-box">
+        <div class="space-bar" style="background:rgba(138,184,201,0.5);width:35%"></div>
+        <div class="space-name" style="color:var(--c6)">sRGB</div>
+        <div class="space-range">覆盖人眼可见色约 35%</div>
+        <div class="space-use">网页、手机屏幕、普通显示器的标准。发朋友圈、上传网络都用这个。小米打印机输出也是 sRGB 范围。</div>
+      </div>
+      <div class="space-box">
+        <div class="space-bar" style="background:rgba(168,201,138,0.5);width:55%"></div>
+        <div class="space-name" style="color:var(--c2)">Adobe RGB</div>
+        <div class="space-range">比 sRGB 大约 50%</div>
+        <div class="space-use">专业摄影和印刷标准，绿色方向扩展明显。<strong>ARW Stacker 工具默认输出目标</strong>，适合继续在 Lightroom 调色。</div>
+      </div>
+      <div class="space-box">
+        <div class="space-bar" style="background:rgba(201,168,76,0.5);width:90%"></div>
+        <div class="space-name" style="color:var(--c4)">ProPhoto RGB</div>
+        <div class="space-range">覆盖人眼可见色约 90%</div>
+        <div class="space-use">比人眼可见颜色还大，含虚构色。Lightroom 内部处理用这个，不适合直接输出，打印机也达不到这个范围。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">WORKFLOW</div>
+    <h2>专业后期的色彩空间流程</h2>
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-icon">拍摄</div>
+        <div class="pipe-text">ARW（无色彩空间，保留全部 14bit 原始数据）</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">内部处理</div>
+        <div class="pipe-text">ProPhoto RGB（最大空间，调色计算不损失精度）</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">输出后期</div>
+        <div class="pipe-text">Adobe RGB（给摄影师继续调色，保留足够大的颜色范围）</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-icon">输出网络</div>
+        <div class="pipe-text">sRGB（发朋友圈/上传网络，确保所有设备颜色正确）</div>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">颜色标签的重要性</div>
+      <p>输出 TIFF 时必须嵌入色彩空间标签，告诉后续软件这个文件用的是哪把尺子。不嵌入标签，软件只能猜，猜错颜色就偏了。ARW Stacker 升级时需要确保输出 TIFF 嵌入 Adobe RGB 标签。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CODE</div>
+    <h2>rawpy 中指定色彩空间</h2>
+    <div class="code-block">
+      <div class="code-label">RAWPY · 色彩空间选择</div>
+      <pre>import rawpy
+
+with rawpy.imread("photo.ARW") as raw:
+    # sRGB 输出（网络/普通用途）
+    img_srgb = raw.postprocess(
+        use_camera_wb=True,
+        output_color=rawpy.ColorSpace.sRGB,
+        output_bps=8
+    )
+
+    # Adobe RGB 输出（后期调色用途）- 工具默认目标
+    img_adobe = raw.postprocess(
+        use_camera_wb=True,
+        output_color=rawpy.ColorSpace.AdobeRGB,
+        output_bps=16   # Adobe RGB 配合 16bit 使用
+    )
+
+    # ProPhoto RGB（内部处理）
+    img_prophoto = raw.postprocess(
+        use_camera_wb=True,
+        output_color=rawpy.ColorSpace.ProPhoto,
+        output_bps=16
+    )</pre>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://www.cambridgeincolour.com/tutorials/color-spaces.htm" target="_blank" class="resource-item">
+        <div class="resource-type">教程 · CAMBRIDGE IN COLOUR</div>
+        <div class="resource-title">Understanding Color Spaces</div>
+        <div class="resource-desc">色彩空间最清晰的图文教程，有 CIE 色度图直观对比各空间范围</div>
+      </a>
+      <a href="https://www.adobe.com/digitalimag/pdfs/phscs2ip_colspace.pdf" target="_blank" class="resource-item">
+        <div class="resource-type">技术文档 · ADOBE</div>
+        <div class="resource-title">Color Spaces, Monitors & Printers</div>
+        <div class="resource-desc">Adobe 官方文档，详细讲解色彩空间在摄影后期工作流中的应用</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../05-histogram/index.html" class="btn-nav">← 直方图</a>
+    <a href="../07-gamma/index.html" class="btn-nav">Gamma曲线 →</a>
+  </div>
+</main>
+</body>
+</html>
