@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卷积核 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--accent:#7eb8c9;}
+.card::before{background:var(--accent);}
+.section h2{color:var(--accent);}
+.kernel-demo{
+  display:flex;align-items:center;gap:20px;
+  margin:20px 0;flex-wrap:wrap;
+}
+.kernel-grid{
+  display:inline-grid;gap:2px;
+}
+.kernel-cell{
+  width:48px;height:48px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;color:var(--text);
+}
+.kernel-cell.highlight{
+  background:rgba(126,184,201,0.15);
+  border-color:var(--accent);
+  color:var(--accent);
+}
+.arrow{font-size:24px;color:var(--muted);}
+.result-box{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;
+  padding:16px 24px;
+  text-align:center;
+}
+.result-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:32px;color:var(--accent);
+}
+.result-label{font-size:11px;color:var(--muted2);margin-top:4px;}
+.sum-table{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;overflow:hidden;margin:20px 0;
+}
+.sum-table table{width:100%;border-collapse:collapse;}
+.sum-table th{
+  background:rgba(126,184,201,0.1);
+  padding:10px 14px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:2px;
+  color:var(--accent);text-align:left;
+  border-bottom:1px solid var(--border2);
+}
+.sum-table td{
+  padding:10px 14px;font-size:12px;
+  color:var(--muted2);
+  border-bottom:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;
+}
+.sum-table td:first-child{color:var(--text);}
+.sum-table tr:last-child td{border-bottom:none;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 02 · 经典图像处理算法</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 02 · 01 · CONVOLUTION KERNEL</div>
+    <h1 class="page-title"><em>卷积核</em></h1>
+    <p class="page-desc">所有经典图像处理算法的基础操作。用一个小矩阵在图像上滑动，对每个位置做数学运算，不同的矩阵产生不同的效果。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CORE CONCEPT</div>
+    <h2>卷积核是什么</h2>
+    <p>卷积核是一个小矩阵，通常是 3×3 或 5×5。处理图像时，把这个矩阵在图像上逐像素滑动，对每个位置做计算：<strong>把卷积核的数字和对应位置的像素值相乘，再全部加起来</strong>，结果就是输出图像在该位置的新像素值。</p>
+    <p>模糊、锐化、边缘检测，本质上只是卷积核的数字不同，计算方式完全一样。</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CALCULATION</div>
+    <h2>计算过程演示</h2>
+    <p>原图中间像素是 200，周围全是 10。用均值模糊核（全部 1/9）对中间像素做计算：</p>
+
+    <div class="kernel-demo">
+      <div>
+        <div class="code-label" style="margin-bottom:8px">原图 3×3 范围</div>
+        <div class="kernel-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kernel-cell">10</div><div class="kernel-cell">10</div><div class="kernel-cell">10</div>
+          <div class="kernel-cell">10</div><div class="kernel-cell highlight">200</div><div class="kernel-cell">10</div>
+          <div class="kernel-cell">10</div><div class="kernel-cell">10</div><div class="kernel-cell">10</div>
+        </div>
+      </div>
+      <div class="arrow">×</div>
+      <div>
+        <div class="code-label" style="margin-bottom:8px">卷积核</div>
+        <div class="kernel-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kernel-cell">1/9</div><div class="kernel-cell">1/9</div><div class="kernel-cell">1/9</div>
+          <div class="kernel-cell">1/9</div><div class="kernel-cell highlight">1/9</div><div class="kernel-cell">1/9</div>
+          <div class="kernel-cell">1/9</div><div class="kernel-cell">1/9</div><div class="kernel-cell">1/9</div>
+        </div>
+      </div>
+      <div class="arrow">=</div>
+      <div class="result-box">
+        <div class="result-val">31</div>
+        <div class="result-label">输出像素值<br>280 ÷ 9 ≈ 31</div>
+      </div>
+    </div>
+
+    <div class="data-box">
+      <div class="data-label">完整计算过程</div>
+      <pre>
+对应相乘再求和：
+10×(1/9) + 10×(1/9) + 10×(1/9)
+10×(1/9) + 200×(1/9) + 10×(1/9)
+10×(1/9) + 10×(1/9) + 10×(1/9)
+
+= (10+10+10 + 10+200+10 + 10+10+10) × (1/9)
+= 280 × (1/9)
+= 31</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">KERNEL SUM RULE</div>
+    <h2>卷积核总和决定输出特性</h2>
+    <p>这是设计卷积核最重要的规律，卷积核所有数字加起来的总和决定了输出图像的整体特性。</p>
+
+    <div class="sum-table">
+      <table>
+        <tr><th>总和</th><th>效果</th><th>典型用途</th></tr>
+        <tr><td>= 1</td><td>整体亮度不变</td><td>模糊、锐化</td></tr>
+        <tr><td>= 0</td><td>平坦区域归零，只保留变化</td><td>边缘检测</td></tr>
+        <tr><td>&gt; 1</td><td>整体变亮</td><td>需要额外归一化</td></tr>
+        <tr><td>&lt; 1 且 &gt; 0</td><td>整体变暗</td><td>需要额外归一化</td></tr>
+      </table>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">归一化规则</div>
+      <p>如果卷积核设计好之后总和不是1，就需要除以总和来归一化。比如高斯核总和是16，计算时每个数除以16，归一化后总和才是1。如果卷积核设计时总和已经是1（比如锐化核），就不需要额外除了。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CLIP</div>
+    <h2>截断（Clip）</h2>
+    <p>卷积计算结果可能超出像素的合法范围，需要截断处理。8bit 图像范围是 0~255，16bit 图像范围是 0~65535。</p>
+    <div class="cards">
+      <div class="card">
+        <h3>低于 0 → 截断为 0</h3>
+        <p>比纯黑还暗是不存在的，截断为纯黑。边缘检测时负值区域会被截断为0。</p>
+      </div>
+      <div class="card">
+        <h3>高于 255 → 截断为 255</h3>
+        <p>比纯白还亮是不存在的，截断为纯白。锐化时高对比区域容易出现溢出截断。</p>
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-label">NUMPY · 截断操作</div>
+      <pre>import numpy as np
+
+result = some_calculation(img)
+
+# 截断到 8bit 范围
+result_8bit = np.clip(result, 0, 255).astype(np.uint8)
+
+# 截断到 16bit 范围
+result_16bit = np.clip(result, 0, 65535).astype(np.uint16)</pre>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://docs.opencv.org/4.x/d4/d13/tutorial_py_filtering.html" target="_blank" class="resource-item">
+        <div class="resource-type">官方教程 · OPENCV</div>
+        <div class="resource-title">Image Filtering</div>
+        <div class="resource-desc">OpenCV 官方滤波教程，包含均值、高斯、中值滤波的代码示例</div>
+      </a>
+      <a href="https://setosa.io/ev/image-kernels/" target="_blank" class="resource-item">
+        <div class="resource-type">交互演示</div>
+        <div class="resource-title">Image Kernels Explained Visually</div>
+        <div class="resource-desc">可以实时拖动调整卷积核数值，看效果变化，强烈推荐直观感受</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../07-gamma/index.html" class="btn-nav">← Gamma曲线</a>
+    <a href="../09-blur/index.html" class="btn-nav">模糊算法 →</a>
+  </div>
+</main>
+</body>
+</html>

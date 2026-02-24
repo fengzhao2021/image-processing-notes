@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图像对齐·ECC算法 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--accent:#c97a7a;}
+.card::before{background:var(--accent);}
+.section h2{color:var(--accent);}
+
+/* 重点标注 */
+.deep-dive-banner{
+  background:rgba(201,122,122,0.08);
+  border:1px solid rgba(201,122,122,0.3);
+  border-left:4px solid var(--accent);
+  border-radius:2px;
+  padding:20px 24px;
+  margin-bottom:40px;
+}
+.deep-dive-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:4px;
+  color:var(--accent);margin-bottom:10px;
+}
+.deep-dive-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.deep-dive-desc{font-size:13px;color:var(--muted2);line-height:1.8;}
+
+/* 前置知识路径 */
+.prereq-section{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;
+  overflow:hidden;
+  margin:20px 0;
+}
+.prereq-header{
+  background:rgba(201,122,122,0.08);
+  padding:14px 20px;
+  border-bottom:1px solid var(--border2);
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:3px;
+  color:var(--accent);
+}
+.prereq-step{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex;gap:16px;
+  align-items:flex-start;
+}
+.prereq-step:last-child{border-bottom:none;}
+.prereq-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--accent);
+  min-width:60px;padding-top:2px;
+}
+.prereq-content{}
+.prereq-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.prereq-items{font-size:12px;color:var(--muted2);line-height:1.8;}
+.prereq-link{
+  display:inline-block;
+  margin-top:8px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;color:var(--accent);
+  text-decoration:none;
+  border:1px solid rgba(201,122,122,0.3);
+  padding:3px 10px;border-radius:2px;
+}
+.prereq-link:hover{background:rgba(201,122,122,0.1);}
+
+.matrix-demo{
+  display:inline-grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;margin:10px 0;
+}
+.m-cell{
+  width:52px;height:40px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;color:var(--text);
+}
+.m-cell.highlight{
+  background:rgba(201,122,122,0.15);
+  border-color:var(--accent);
+  color:var(--accent);
+}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 02 · 经典图像处理算法</div>
+</nav>
+<main class="main">
+
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 02 · 05 · IMAGE ALIGNMENT · ECC</div>
+    <h1 class="page-title">图像对齐 · <em>ECC算法</em></h1>
+    <p class="page-desc">手持包围曝光照片叠加前必须对齐，否则出现重影。ECC 算法通过迭代优化找到最优变换矩阵，让两张图相关性最大化。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <!-- 重点标注 -->
+  <div class="deep-dive-banner">
+    <div class="deep-dive-label">⚑ 需要二次深入 · DEEP DIVE REQUIRED</div>
+    <div class="deep-dive-title">ECC 算法涉及研究生级别数学，需要补齐前置知识后重新深入</div>
+    <div class="deep-dive-desc">当前理解层次：相关性原理、迭代思路、变换矩阵直觉已掌握。雅可比矩阵推导、ΔM 公式推导属于"似懂非懂"状态，需要先补完下方前置知识，再回来重新扣一遍原理，最终目标是能读懂 2008 年原始论文。</div>
+  </div>
+
+  <!-- 前置知识路径 -->
+  <div class="section">
+    <div class="section-label">PREREQUISITES · 前置知识学习路径</div>
+    <h2>补齐这些数学后再回来</h2>
+
+    <div class="prereq-section">
+      <div class="prereq-header">学习顺序 · 按步骤完成</div>
+
+      <div class="prereq-step">
+        <div class="prereq-num">第一步</div>
+        <div class="prereq-content">
+          <div class="prereq-title">高等数学 · 导数与偏导数</div>
+          <div class="prereq-items">
+            · 导数的直觉：变化率<br>
+            · 偏导数：多变量函数，只改变一个变量<br>
+            · 链式法则：复合函数求导<br>
+            · 泰勒展开：用多项式近似复杂函数（今天已有直觉）
+          </div>
+          <a href="https://www.khanacademy.org/math/multivariable-calculus/multivariable-derivatives/partial-derivative-and-gradient-articles/a/introduction-to-partial-derivatives" target="_blank" class="prereq-link">Khan Academy · 偏导数入门 →</a>
+        </div>
+      </div>
+
+      <div class="prereq-step">
+        <div class="prereq-num">第二步</div>
+        <div class="prereq-content">
+          <div class="prereq-title">线性代数 · 矩阵运算</div>
+          <div class="prereq-items">
+            · 矩阵乘法规则（基础已有印象）<br>
+            · 矩阵转置 Aᵀ<br>
+            · 矩阵求逆 A⁻¹<br>
+            · 最小二乘法：如何用矩阵求解超定方程组
+          </div>
+          <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank" class="prereq-link">3Blue1Brown · 线性代数的本质（强烈推荐）→</a>
+        </div>
+      </div>
+
+      <div class="prereq-step">
+        <div class="prereq-num">第三步</div>
+        <div class="prereq-content">
+          <div class="prereq-title">数值优化 · 迭代方法</div>
+          <div class="prereq-items">
+            · 梯度下降：沿最陡方向走（今天已有直觉）<br>
+            · 牛顿法：利用二阶信息更快收敛<br>
+            · 收敛条件：什么时候停止迭代<br>
+            · 学习率：步长的控制
+          </div>
+          <a href="https://cs231n.github.io/optimization-1/" target="_blank" class="prereq-link">Stanford CS231n · 优化方法 →</a>
+        </div>
+      </div>
+
+      <div class="prereq-step">
+        <div class="prereq-num">第四步</div>
+        <div class="prereq-content">
+          <div class="prereq-title">回来重新扣 ECC 原理</div>
+          <div class="prereq-items">
+            · 雅可比矩阵完整推导<br>
+            · ΔM = (JᵀJ)⁻¹ × Jᵀ × (A - B'×ρ) 公式推导<br>
+            · 读原始论文：Evangelidis & Psarakis (2008)
+          </div>
+          <a href="https://ieeexplore.ieee.org/document/4515873" target="_blank" class="prereq-link">原始论文 · IEEE 2008 →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 现在已经理解的部分 -->
+  <div class="section">
+    <div class="section-label">CURRENT UNDERSTANDING</div>
+    <h2>目前已掌握的部分</h2>
+
+    <div class="cards">
+      <div class="card">
+        <h3>为什么需要对齐</h3>
+        <p>手持拍摄包围曝光，每张照片有轻微位移和旋转。直接叠加会出现重影，对齐后叠加才清晰。</p>
+      </div>
+      <div class="card">
+        <h3>变换矩阵</h3>
+        <p>用 2×3 矩阵描述图像的平移、旋转、缩放变换。找到这个矩阵，就找到了两张图的对齐关系。</p>
+      </div>
+      <div class="card">
+        <h3>相关性是什么</h3>
+        <p>两张图叠在一起，对应像素先去均值，再逐像素相乘求和，再除以各自能量归一化。结果 1 表示完全对齐，0 表示无关。</p>
+      </div>
+      <div class="card">
+        <h3>迭代优化思路</h3>
+        <p>从单位矩阵开始，不断微调变换矩阵，每次往相关性更高的方向走，直到相关性不再提高为止。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">TRANSFORM MATRIX</div>
+    <h2>变换矩阵详解</h2>
+    <p>2×3 变换矩阵可以同时表达平移、旋转、缩放三种变换：</p>
+
+    <div class="code-block">
+      <div class="code-label">变换矩阵结构</div>
+      <pre>| a  b  tx |
+| c  d  ty |
+
+对像素 (x, y) 的变换：
+新x = a×x + b×y + tx
+新y = c×x + d×y + ty
+
+纯平移（右5下3）：        纯旋转5度：
+| 1  0  5 |               | 0.996  -0.087  0 |
+| 0  1  3 |               | 0.087   0.996  0 |
+
+其中 cos(5°)≈0.996，sin(5°)≈0.087
+来自高中三角函数：旋转角度θ对应的坐标变换公式</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CORRELATION</div>
+    <h2>相关性计算过程</h2>
+    <div class="data-box">
+      <div class="data-label">3个像素的相关性演算</div>
+      <pre>
+A图：10   200   10
+B图：10   200   10   （完全对齐）
+
+第一步：去均值（消除整体亮度差异）
+A均值 = (10+200+10)/3 = 73.3
+A去均值后：-63.3   126.7   -63.3
+
+B均值 = 73.3（相同）
+B去均值后：-63.3   126.7   -63.3
+
+第二步：逐像素相乘再求和
+Σ(A×B) = (-63.3×-63.3) + (126.7×126.7) + (-63.3×-63.3)
+        = 4006.9 + 16052.9 + 4006.9 = 24066.7
+
+为什么相乘：同号相乘为正（同方向），异号相乘为负（反方向）
+为什么求和：把所有像素的趋势汇总成一个结论
+
+第三步：归一化（消除亮度绝对值影响）
+A图能量 = √(63.3² + 126.7² + 63.3²) = √24066.7 ≈ 155.1
+B图能量 = 155.1（相同）
+
+相关性 = 24066.7 / (155.1 × 155.1) ≈ 1.0  → 完全对齐</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">ECC MATH · 待深入</div>
+    <h2>ECC 核心公式（补完前置知识后深入）</h2>
+    <p>目前"似懂非懂"的部分，记录在这里，补完数学后回来重新理解：</p>
+
+    <div class="code-block">
+      <div class="code-label">ECC 最优步长公式</div>
+      <pre>ΔM = (JᵀJ)⁻¹ × Jᵀ × (A - B'×ρ)
+
+J：雅可比矩阵，N×6（N个像素，6个矩阵参数）
+   J[像素i][参数j] = 像素i的亮度对参数j的偏导数
+   tx/ty的偏导数 = 图像在x/y方向的梯度（即Sobel结果）
+   a/b/c/d的偏导数 = 坐标值 × 对应方向梯度
+
+(A - B'×ρ)：残差，每个像素位置还差多少
+Jᵀ × 残差：把像素误差转换成参数调整方向（投票）
+(JᵀJ)⁻¹：平衡不同参数的量纲，让调整量合理
+
+本质：泰勒一阶展开 + 最小二乘法求最优ΔM</pre>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">和卷积神经网络的关联</div>
+      <p>雅可比矩阵在神经网络里无处不在，反向传播本质上就是对每一层计算雅可比矩阵再用链式法则传递梯度。ECC 里的迭代优化和神经网络训练是同一件事，只是规模不同。今天理解的这些是深度学习的地基。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CODE · 工具直接可用</div>
+    <h2>OpenCV 代码（三行搞定）</h2>
+    <div class="code-block">
+      <div class="code-label">PYTHON · OPENCV · ECC对齐</div>
+      <pre>import cv2
+import numpy as np
+
+# 读取两张图（转灰度，ECC在灰度图上运行更快）
+img1 = cv2.imread("photo1.ARW_processed.tif", cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread("photo2.ARW_processed.tif", cv2.IMREAD_GRAYSCALE)
+
+# 初始变换矩阵（单位矩阵，不做任何变换）
+M = np.eye(2, 3, dtype=np.float32)
+
+# ECC 对齐：找到最优变换矩阵
+# MOTION_EUCLIDEAN = 平移+旋转（手持拍摄用这个）
+criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 50, 0.001)
+_, M = cv2.findTransformECC(img1, img2, M, cv2.MOTION_EUCLIDEAN, criteria)
+
+# 用找到的矩阵对齐第二张图
+aligned = cv2.warpAffine(img2, M, (img2.shape[1], img2.shape[0]),
+                          flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)
+
+# 对彩色图做同样变换
+img2_color = cv2.imread("photo2.ARW_processed.tif")
+aligned_color = cv2.warpAffine(img2_color, M,
+                                (img2_color.shape[1], img2_color.shape[0]),
+                                flags=cv2.INTER_LINEAR + cv2.WARP_INVERSE_MAP)</pre>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://ieeexplore.ieee.org/document/4515873" target="_blank" class="resource-item">
+        <div class="resource-type">原始论文 · IEEE 2008</div>
+        <div class="resource-title">Parametric Image Alignment Using ECC</div>
+        <div class="resource-desc">Evangelidis & Psarakis 原始论文，补完前置知识后阅读</div>
+      </a>
+      <a href="https://learnopencv.com/image-alignment-ecc-in-opencv-c-python/" target="_blank" class="resource-item">
+        <div class="resource-type">教程 · LEARNOPENCV</div>
+        <div class="resource-title">Image Alignment ECC in OpenCV</div>
+        <div class="resource-desc">ECC 实战教程，包含完整代码和参数调整指南</div>
+      </a>
+      <a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank" class="resource-item">
+        <div class="resource-type">视频课程 · 3BLUE1BROWN</div>
+        <div class="resource-title">线性代数的本质（前置知识第二步）</div>
+        <div class="resource-desc">最直观的线性代数视频课，矩阵运算有几何直觉，强烈推荐先看这个</div>
+      </a>
+      <a href="https://www.khanacademy.org/math/multivariable-calculus" target="_blank" class="resource-item">
+        <div class="resource-type">在线课程 · KHAN ACADEMY</div>
+        <div class="resource-title">多变量微积分（前置知识第一步）</div>
+        <div class="resource-desc">偏导数和梯度的完整课程，免费，有练习题</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../11-edge-detection/index.html" class="btn-nav">← 边缘检测</a>
+    <a href="../index.html" class="btn-nav">返回主页 →</a>
+  </div>
+</main>
+</body>
+</html>

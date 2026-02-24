@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>边缘检测 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--accent:#c9a84c;}
+.card::before{background:var(--accent);}
+.section h2{color:var(--accent);}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 02 · 经典图像处理算法</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 02 · 04 · EDGE DETECTION</div>
+    <h1 class="page-title"><em>边缘检测</em></h1>
+    <p class="page-desc">找出图像里亮度变化剧烈的位置。卷积核总和为0，平坦区域归零，只保留变化的地方。Sobel 算子是最常用的边缘检测算法。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">EDGE ESSENCE</div>
+    <h2>边缘是什么</h2>
+    <p>图像里亮度值<strong>变化剧烈</strong>的地方就是边缘。白纸上的黑字，边缘亮度从255突然跳到0，变化很大。平坦的天空，相邻像素亮度差别很小，不是边缘。</p>
+    <p>边缘检测的本质：<strong>找出图像里亮度变化剧烈的位置，变化越大越亮，平坦区域归零显示为黑。</strong></p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">SOBEL KERNEL</div>
+    <h2>Sobel 算子</h2>
+    <p>用两个卷积核分别检测横向和纵向的亮度变化，再合并成总边缘强度。</p>
+    <div class="code-block">
+      <div class="code-label">Sobel 核</div>
+      <pre>横向核（检测左右变化）：    纵向核（检测上下变化）：
+-1  0  1                    -1  -1  -1
+-1  0  1                     0   0   0
+-1  0  1                     1   1   1
+
+两个核总和都是 0
+平坦区域（左右/上下亮度相同）结果为 0</pre>
+    </div>
+    <div class="insight">
+      <div class="insight-label">为什么总和为0就能检测边缘</div>
+      <p>总和为0意味着对平坦区域（所有像素值相同）的计算结果一定是0。只有左右或上下亮度不同的地方，正负权重不能抵消，结果才不是0。数值越大说明变化越剧烈，边缘越强。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">FULL CALCULATION</div>
+    <h2>完整演算</h2>
+    <div class="data-box">
+      <div class="data-label">原图中间200，周围全是10 · 完整Sobel演算</div>
+      <pre>
+【横向Sobel结果】
+200左边的10（右侧是200）：
+10×(-1)+10×0+10×1 + 10×(-1)+10×0+200×1 + 10×(-1)+10×0+10×1
+= 0 + 190 + 0 = 190
+
+200右边的10（左侧是200）：
+10×(-1)+200×0+10×1 + 10×(-1)+200×0+10×1 + 10×(-1)+200×0+10×1
+不对，重新算，左边是200：
+200×(-1)+10×0+10×1 + 200×(-1)+10×0+10×1 + 200×(-1)+10×0+10×1
+= -190 + (-190) + (-190) 
+不对，3×3范围里200只在一个位置：
+
+200右边那个10，3×3范围：
+10  200  10
+10  200  10   ← 错误，200只有一个
+10  200  10
+
+正确3×3范围（200在左边）：
+10  200  10
+10  200  10   ← 还是错
+实际原图200只在第3行第3列，右边那个10是第3行第4列：
+3×3范围：
+10  10  10
+200  10  10
+10  10  10
+
+套横向核：
+10×(-1)+10×0+10×1 + 200×(-1)+10×0+10×1 + 10×(-1)+10×0+10×1
+= 0 + (-190) + 0 = -190
+
+200上方的10（第2行第3列）：
+3×3范围：
+10  10  10
+10  10  10
+10 200  10
+套横向核：
+10×(-1)+10×0+10×1 + 10×(-1)+10×0+10×1 + 10×(-1)+200×0+10×1
+= 0 + 0 + 0 = 0（200在中间列，权重是0）
+
+横向完整结果：
+0    0    0    0   0
+0  190    0 -190   0
+0  190    0 -190   0
+0  190    0 -190   0
+0    0    0    0   0
+
+【纵向Sobel结果】
+200上方的10（第2行第3列）：
+3×3范围：
+10  10  10
+10  10  10
+10 200  10
+套纵向核：
+10×(-1)+10×(-1)+10×(-1) + 10×0+10×0+10×0 + 10×1+200×1+10×1
+= -30 + 0 + 220 = 190
+
+200下方的10（第4行第3列）：
+3×3范围：
+10 200  10
+10  10  10
+10  10  10
+套纵向核：
+10×(-1)+200×(-1)+10×(-1) + 10×0+10×0+10×0 + 10×1+10×1+10×1
+= -220 + 0 + 30 = -190
+
+200左边的10（第3行第2列）：
+3×3范围：
+10  10  10
+10  10 200
+10  10  10
+套纵向核：
+10×(-1)+10×(-1)+10×(-1) + 10×0+10×0+200×0 + 10×1+10×1+10×1
+= -30 + 0 + 30 = 0（200在中间行，权重是0）
+
+纵向完整结果：
+ 0     0     0     0    0
+ 0   190   190   190    0
+ 0     0     0     0    0
+ 0  -190  -190  -190    0
+ 0     0     0     0    0
+
+【合并：√(横向² + 纵向²)】
+第2行第2列：√(190² + 190²) = √72200 ≈ 269
+第2行第3列：√(0² + 190²) = 190
+第2行第4列：√(190² + 190²) ≈ 269
+第3行第2列：√(190² + 0²) = 190
+第3行第3列（200本身）：√(0² + 0²) = 0
+第3行第4列：√(190² + 0²) = 190
+第4行第2列：√(190² + 190²) ≈ 269
+第4行第3列：√(0² + 190²) = 190
+第4行第4列：√(190² + 190²) ≈ 269
+
+最终边缘检测结果：
+  0    0    0    0    0
+  0  269  190  269    0
+  0  190    0  190    0
+  0  269  190  269    0
+  0    0    0    0    0
+
+四角269最亮（同时有横向和纵向边缘）
+上下左右190次之（只有一个方向）
+200本身是0（被周围对称包围，两方向都检测不到）
+平坦区域全是0</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CODE</div>
+    <h2>OpenCV 代码</h2>
+    <div class="code-block">
+      <div class="code-label">PYTHON · OPENCV · SOBEL</div>
+      <pre>import cv2
+import numpy as np
+
+img = cv2.imread("photo.jpg", cv2.IMREAD_GRAYSCALE)
+
+# 横向和纵向 Sobel
+sobel_x = cv2.Sobel(img, cv2.CV_64F, 1, 0, ksize=3)
+sobel_y = cv2.Sobel(img, cv2.CV_64F, 0, 1, ksize=3)
+
+# 合并：计算总边缘强度
+magnitude = np.sqrt(sobel_x**2 + sobel_y**2)
+magnitude = np.clip(magnitude, 0, 255).astype(np.uint8)
+
+# 或者用 Canny（自动双阈值，效果更好）
+edges = cv2.Canny(img, threshold1=50, threshold2=150)</pre>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://docs.opencv.org/4.x/da/d22/tutorial_py_canny.html" target="_blank" class="resource-item">
+        <div class="resource-type">官方教程 · OPENCV</div>
+        <div class="resource-title">Canny Edge Detection</div>
+        <div class="resource-desc">比 Sobel 更完善的边缘检测算法，OpenCV 官方教程</div>
+      </a>
+      <a href="https://en.wikipedia.org/wiki/Sobel_operator" target="_blank" class="resource-item">
+        <div class="resource-type">参考 · WIKIPEDIA</div>
+        <div class="resource-title">Sobel Operator</div>
+        <div class="resource-desc">Sobel 算子的完整数学推导和各种变体</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../10-sharpen/index.html" class="btn-nav">← 锐化</a>
+    <a href="../12-image-align/index.html" class="btn-nav">图像对齐 →</a>
+  </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>锐化 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--accent:#c98ab8;}
+.card::before{background:var(--accent);}
+.section h2{color:var(--accent);}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 02 · 经典图像处理算法</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 02 · 03 · SHARPEN</div>
+    <h1 class="page-title"><em>锐化</em></h1>
+    <p class="page-desc">锐化是模糊的反面操作，放大像素和周围的差距。卷积核总和为1，平坦区域不变，边缘对比度被放大。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">SHARPEN ESSENCE</div>
+    <h2>锐化的本质</h2>
+    <p>模糊让像素向周围靠近，锐化让像素<strong>远离</strong>周围，把和周围的差距放大。</p>
+    <p>公式：<strong>锐化 = 原图 + (原图 - 模糊图)</strong></p>
+    <p>原图减去模糊图，得到的是图像里的细节和边缘信息，因为平坦区域模糊前后几乎没变化，相减接近0，只有边缘和细节变化大，相减后数值明显。把这部分细节加回原图，边缘就被强调出来了。</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">SHARPEN KERNEL</div>
+    <h2>锐化卷积核</h2>
+    <div class="code-block">
+      <div class="code-label">锐化核 3×3</div>
+      <pre> 0  -1   0
+-1   5  -1
+ 0  -1   0
+
+总和 = 5 + (-1×4) = 1  → 保持整体亮度不变
+不需要额外归一化</pre>
+    </div>
+    <div class="insight">
+      <div class="insight-label">为什么总和是1不需要归一化</div>
+      <p>均值模糊核全是1，总和9，需要除以9归一化。高斯核总和16，需要除以16归一化。锐化核设计时总和已经是1，不需要再除。规律：卷积核总和不是1时需要归一化，总和已经是1时直接用。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CALCULATION</div>
+    <h2>完整演算</h2>
+    <div class="data-box">
+      <div class="data-label">原图中间200，周围全是10</div>
+      <pre>
+200本身：
+0×10 + (-1)×10 + 0×10
+(-1)×10 + 5×200 + (-1)×10
+0×10 + (-1)×10 + 0×10
+= 0-10+0-10+1000-10+0-10+0 = 960 → 截断为 255
+
+正右边的10（3×3范围左边是200）：
+0×10 + (-1)×10 + 0×10
+(-1)×200 + 5×10 + (-1)×10
+0×10 + (-1)×10 + 0×10
+= 0-10+0-200+50-10+0-10+0 = -180 → 截断为 0
+
+正上方的10（3×3范围下边是200）：
+0×10 + (-1)×10 + 0×10
+(-1)×10 + 5×10 + (-1)×10
+0×10 + (-1)×200 + 0×10
+= 0-10+0-10+50-10+0-200+0 = -180 → 截断为 0
+
+斜角的10（3×3范围只有角上是200，权重是0）：
+200在角上，对应卷积核位置是0，贡献为0
+结果 = 平坦区域计算 = 10，保持不变
+
+完整结果：
+原图：                    锐化后：
+10  10  10  10  10        10  10  10  10  10
+10  10  10  10  10        10  10   0  10  10
+10  10 200  10  10   →    10   0 255   0  10
+10  10  10  10  10        10  10   0  10  10
+10  10  10  10  10        10  10  10  10  10
+
+200变255更亮，正上下左右变0更暗，斜角和远处保持10不变
+（因为锐化核斜角权重是0，斜角像素不受影响）</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">SHARPEN VS EXPOSURE</div>
+    <h2>锐化 vs 曝光调整</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>曝光调整（线性乘法）</h3>
+        <p>所有像素值等比例乘以系数，整体平移。提亮时高光容易溢出，因为亮部和暗部同等放大。Lightroom 的曝光滑块是这个原理。</p>
+      </div>
+      <div class="card">
+        <h3>锐化（卷积运算）</h3>
+        <p>只放大像素和周围的差距，平坦区域完全不变。不会造成整体过曝，只影响边缘和细节区域。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CODE</div>
+    <h2>OpenCV 代码</h2>
+    <div class="code-block">
+      <div class="code-label">PYTHON · OPENCV</div>
+      <pre>import cv2
+import numpy as np
+
+img = cv2.imread("photo.jpg")
+
+# 方法一：直接用锐化卷积核
+kernel = np.array([[0, -1, 0],
+                   [-1, 5, -1],
+                   [0, -1, 0]])
+sharpened = cv2.filter2D(img, -1, kernel)
+
+# 方法二：原图减去模糊图再加回（USM锐化）
+blurred = cv2.GaussianBlur(img, (5, 5), 0)
+sharpened_usm = cv2.addWeighted(img, 1.5, blurred, -0.5, 0)</pre>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://docs.opencv.org/4.x/d4/d13/tutorial_py_filtering.html" target="_blank" class="resource-item">
+        <div class="resource-type">官方教程 · OPENCV</div>
+        <div class="resource-title">Image Filtering · filter2D</div>
+        <div class="resource-desc">cv2.filter2D 的完整用法，自定义任意卷积核</div>
+      </a>
+      <a href="https://en.wikipedia.org/wiki/Unsharp_masking" target="_blank" class="resource-item">
+        <div class="resource-type">参考 · WIKIPEDIA</div>
+        <div class="resource-title">Unsharp Masking（USM锐化）</div>
+        <div class="resource-desc">Lightroom 里"清晰度"功能的底层原理，就是 USM 锐化</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../09-blur/index.html" class="btn-nav">← 模糊算法</a>
+    <a href="../11-edge-detection/index.html" class="btn-nav">边缘检测 →</a>
+  </div>
+</main>
+</body>
+</html>
