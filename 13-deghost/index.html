@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>去鬼影·HDR合成 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--accent:#8ab8c9;}
+.card::before{background:var(--accent);}
+.section h2{color:var(--accent);}
+.flow-pipeline{
+  display:flex;flex-direction:column;gap:8px;margin:20px 0;
+}
+.flow-item{
+  display:flex;align-items:flex-start;gap:16px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;padding:14px 18px;
+}
+.flow-step{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:2px;
+  color:var(--accent);min-width:60px;
+  padding-top:2px;
+}
+.flow-content{font-size:13px;color:var(--muted2);line-height:1.8;}
+.flow-content strong{color:var(--text);}
+.weight-demo{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;margin:20px 0;
+}
+.weight-box{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;padding:16px;
+  text-align:center;
+}
+.weight-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.weight-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:22px;color:var(--accent);margin-bottom:4px;
+}
+.weight-desc{font-size:11px;color:var(--muted2);}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 02 · 经典图像处理算法</div>
+</nav>
+<main class="main">
+
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 02 · 06 · DEGHOST & HDR</div>
+    <h1 class="page-title">去鬼影 · <em>HDR合成</em></h1>
+    <p class="page-desc">包围曝光叠加的最后一步。去鬼影检测移动区域并排除，HDR合成让每个亮度区域用最合适的曝光数据，两者结合成完整的包围曝光处理流程。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">GHOST ARTIFACT</div>
+    <h2>鬼影是什么</h2>
+    <p>手持拍摄三张包围曝光，场景里有移动的物体（行人、树叶、水面），三张图对齐之后，这些移动的物体在每张图里位置不同，叠加时同一个位置出现多个残影，看起来像鬼一样。</p>
+    <div class="cards">
+      <div class="card">
+        <h3>静止区域</h3>
+        <p>三张图同一位置像素值接近，只有曝光差导致的整体亮度差异，叠加平均效果好。</p>
+      </div>
+      <div class="card">
+        <h3>移动区域</h3>
+        <p>某张图该位置的像素值和其他两张差很多，说明这里有移动的物体，直接平均会产生鬼影。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">DETECTION</div>
+    <h2>检测移动区域</h2>
+    <p>以基准图（中间曝光）为参考，逐像素计算每张图和基准图的差值绝对值。差值小是静止区域，差值大是移动区域。</p>
+
+    <div class="data-box">
+      <div class="data-label">数字例子</div>
+      <pre>
+某像素位置，三张图的值：
+
+静止区域：
+  图1（欠曝）：100
+  图2（基准）：120
+  图3（过曝）：140
+  差值：|100-120|=20，|140-120|=20  → 差值小，静止
+
+移动区域：
+  图1（欠曝）：100
+  图2（基准）：100
+  图3（过曝）：220   （第三张这里有人走过）
+  差值：|100-100|=0，|220-100|=120  → 图3差值大，移动</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">SOFT WEIGHT</div>
+    <h2>软权重：平滑过渡不出锯齿</h2>
+    <p>直接用阈值做硬判断（参与/不参与），移动区域边缘会出现锯齿，因为从参与到不参与是突然跳变的。用软权重代替，差值越大权重越小，边缘平滑过渡。</p>
+
+    <div class="code-block">
+      <div class="code-label">软权重公式</div>
+      <pre>weight = exp(-差值 / threshold)
+
+差值 = 0   → exp(0) = 1.0    完全参与
+差值 = 30  → exp(-1) ≈ 0.37  部分参与
+差值 = 60  → exp(-2) ≈ 0.14  少量参与
+差值 = 90  → exp(-3) ≈ 0.05  几乎不参与
+差值 = 120 → exp(-4) ≈ 0.02  基本排除</pre>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">和高斯模糊的相同思想</div>
+      <p>高斯模糊里，距离越大权重越小，用 exp(-距离²/σ²) 控制。去鬼影里，差值越大权重越小，用 exp(-差值/threshold) 控制。两者都是用指数函数实现平滑衰减，同一个思想在不同场景的应用。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">HDR MERGE</div>
+    <h2>HDR合成：不同亮度区域用最合适的曝光</h2>
+    <p>包围曝光叠加的真正目的不是简单平均，而是让每个亮度区域用最合适的那张图：</p>
+
+    <div class="weight-demo">
+      <div class="weight-box">
+        <div class="weight-title" style="color:var(--c6)">欠曝图</div>
+        <div class="weight-val">高光区域</div>
+        <div class="weight-desc">高光没有溢出，保留最多高光细节，亮部权重最大</div>
+      </div>
+      <div class="weight-box">
+        <div class="weight-title" style="color:var(--c2)">正常曝光</div>
+        <div class="weight-val">中间调</div>
+        <div class="weight-desc">中间调最准确，中等亮度区域权重最大</div>
+      </div>
+      <div class="weight-box">
+        <div class="weight-title" style="color:var(--c5)">过曝图</div>
+        <div class="weight-val">暗部区域</div>
+        <div class="weight-desc">暗部噪点最少，暗部区域权重最大</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">曝光权重公式</div>
+      <pre>曝光权重 = exp(-(亮度值 - 最佳亮度)² / σ²)
+
+欠曝图最佳亮度高（比如0.8），亮部区域离最佳亮度近，权重大
+过曝图最佳亮度低（比如0.2），暗部区域离最佳亮度近，权重大
+正常图最佳亮度中（比如0.5），中间调权重大</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">COMBINED WEIGHT</div>
+    <h2>最终权重：两者相乘</h2>
+    <p>去鬼影权重和曝光权重相乘，同时处理移动检测和HDR合成：</p>
+
+    <div class="code-block">
+      <div class="code-label">最终权重</div>
+      <pre>最终权重 = 去鬼影权重 × 曝光权重
+
+移动区域：去鬼影权重接近0 → 最终权重接近0，排除
+静止高光：去鬼影权重≈1 × 欠曝图曝光权重大 → 用欠曝数据
+静止暗部：去鬼影权重≈1 × 过曝图曝光权重大 → 用过曝数据</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">COMPLETE PIPELINE</div>
+    <h2>包围曝光完整处理流程</h2>
+    <div class="flow-pipeline">
+      <div class="flow-item">
+        <div class="flow-step">第一步</div>
+        <div class="flow-content"><strong>RAW 解码</strong>：用 rawpy 解码三张 ARW，输出 16bit Adobe RGB TIFF，使用 AHD 去马赛克</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-step">第二步</div>
+        <div class="flow-content"><strong>ECC 对齐</strong>：以中间曝光为基准，对齐欠曝和过曝图，消除手持抖动</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-step">第三步</div>
+        <div class="flow-content"><strong>去鬼影检测</strong>：逐像素计算差值，生成去鬼影软权重</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-step">第四步</div>
+        <div class="flow-content"><strong>曝光权重</strong>：按每个像素的亮度值，计算三张图各自的曝光权重</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-step">第五步</div>
+        <div class="flow-content"><strong>加权合并</strong>：最终权重 = 去鬼影权重 × 曝光权重，加权平均输出</div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-step">第六步</div>
+        <div class="flow-content"><strong>输出</strong>：16bit TIFF，交给 Lightroom 继续调色</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CODE</div>
+    <h2>完整代码实现</h2>
+    <div class="code-block">
+      <div class="code-label">PYTHON · 去鬼影 + HDR合成</div>
+      <pre>import cv2
+import numpy as np
+
+# 读取三张对齐后的图
+img1 = cv2.imread("photo_under.tif").astype(np.float32)   # 欠曝
+img2 = cv2.imread("photo_normal.tif").astype(np.float32)  # 基准
+img3 = cv2.imread("photo_over.tif").astype(np.float32)    # 过曝
+
+# 归一化到 0-1
+img1_n = img1 / 65535.0
+img2_n = img2 / 65535.0
+img3_n = img3 / 65535.0
+
+# === 去鬼影权重 ===
+threshold = 0.1  # 16bit归一化后的阈值
+ghost_w1 = np.exp(-np.abs(img1_n - img2_n) / threshold)
+ghost_w2 = np.ones_like(img2_n)  # 基准图固定为1
+ghost_w3 = np.exp(-np.abs(img3_n - img2_n) / threshold)
+
+# === 曝光权重（按亮度分配） ===
+sigma = 0.2
+exp_w1 = np.exp(-((img1_n - 0.75)**2) / (2*sigma**2))  # 欠曝偏亮
+exp_w2 = np.exp(-((img2_n - 0.50)**2) / (2*sigma**2))  # 正常中间调
+exp_w3 = np.exp(-((img3_n - 0.25)**2) / (2*sigma**2))  # 过曝偏暗
+
+# === 最终权重 = 去鬼影 × 曝光权重 ===
+w1 = ghost_w1 * exp_w1
+w2 = ghost_w2 * exp_w2
+w3 = ghost_w3 * exp_w3
+
+# === 加权平均合并 ===
+total = w1 + w2 + w3 + 1e-6  # 防止除以零
+result = (img1_n*w1 + img2_n*w2 + img3_n*w3) / total
+
+# 输出 16bit TIFF
+result_16bit = np.clip(result * 65535, 0, 65535).astype(np.uint16)
+cv2.imwrite("hdr_merged.tif", result_16bit)</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">SIMPLE VS COMPLEX</div>
+    <h2>去鬼影 vs ECC 难度对比</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>ECC 图像对齐</h3>
+        <p>迭代优化、雅可比矩阵、泰勒展开、最小二乘法，研究生级别数学，需要二次深入。</p>
+      </div>
+      <div class="card">
+        <h3>去鬼影+HDR合成</h3>
+        <p>本质是 if 判断的软化版本，逐像素比较差值，用指数函数生成权重，加权平均。数学简单，直觉清晰。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://mertens.pages.dev/" target="_blank" class="resource-item">
+        <div class="resource-type">论文 · MERTENS 2007</div>
+        <div class="resource-title">Exposure Fusion</div>
+        <div class="resource-desc">曝光融合经典论文，OpenCV 的 MergeMertens 就是这个算法，简单高效</div>
+      </a>
+      <a href="https://docs.opencv.org/4.x/d2/df0/tutorial_py_hdr.html" target="_blank" class="resource-item">
+        <div class="resource-type">官方教程 · OPENCV</div>
+        <div class="resource-title">High Dynamic Range Imaging</div>
+        <div class="resource-desc">OpenCV 官方 HDR 教程，包含 Mertens、Debevec 等多种算法对比</div>
+      </a>
+      <a href="https://www.cambridgeincolour.com/tutorials/high-dynamic-range.htm" target="_blank" class="resource-item">
+        <div class="resource-type">教程 · CAMBRIDGE IN COLOUR</div>
+        <div class="resource-title">Understanding HDR Photography</div>
+        <div class="resource-desc">HDR 摄影原理最直观的图文教程</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../12-image-align/index.html" class="btn-nav">← 图像对齐·ECC</a>
+    <a href="../index.html" class="btn-nav">返回主页 →</a>
+  </div>
+</main>
+</body>
+</html>
