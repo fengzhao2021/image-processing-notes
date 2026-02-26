@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>噪点的来源 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--accent:#9a8ac9;}
+.card::before{background:var(--accent);}
+.section h2{color:var(--accent);}
+.pipeline-flow{
+  display:flex;flex-direction:column;gap:0;margin:20px 0;
+}
+.pipeline-step{
+  display:flex;gap:16px;
+  padding:16px 20px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-bottom:none;
+  align-items:flex-start;
+}
+.pipeline-step:first-child{border-radius:2px 2px 0 0;}
+.pipeline-step:last-child{border-bottom:1px solid var(--border2);border-radius:0 0 2px 2px;}
+.pipeline-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:2px;
+  color:var(--accent);min-width:50px;padding-top:2px;
+}
+.pipeline-content{}
+.pipeline-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.pipeline-desc{font-size:12px;color:var(--muted2);line-height:1.8;}
+.noise-tag{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:2px;
+  padding:2px 8px;border-radius:2px;
+  margin-top:8px;
+}
+.tag-shot{background:rgba(201,122,122,0.1);color:#c97a7a;border:1px solid rgba(201,122,122,0.2);}
+.tag-dark{background:rgba(168,201,138,0.1);color:#a8c98a;border:1px solid rgba(168,201,138,0.2);}
+.tag-read{background:rgba(154,138,201,0.1);color:#9a8ac9;border:1px solid rgba(154,138,201,0.2);}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 03 · 计算摄影</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 03 · 01 · NOISE SOURCE</div>
+    <h1 class="page-title"><em>噪点的来源</em></h1>
+    <p class="page-desc">照片里的噪点不是一种，而是三种完全不同来源的叠加。来源不同，处理方法不同。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">SENSOR PIPELINE</div>
+    <h2>传感器工作流程</h2>
+    <p>先理解传感器把光变成数字的完整过程，三种噪声分别在不同环节产生。</p>
+
+    <div class="pipeline-flow">
+      <div class="pipeline-step">
+        <div class="pipeline-num">第一步</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">光子打到像素</div>
+          <div class="pipeline-desc">光通过镜头打到传感器上，每个光子触发光电效应，释放一个电子</div>
+          <div><span class="noise-tag tag-shot">散粒噪声在此产生</span></div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">第二步</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">电子积累在势阱里</div>
+          <div class="pipeline-desc">每个像素像一个小桶，收集曝光期间打入的所有电子，曝光时间越长收集越多</div>
+          <div><span class="noise-tag tag-dark">暗电流噪声在此产生</span></div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">第三步</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">电子数量转换成电压</div>
+          <div class="pipeline-desc">曝光结束，读出电路把每个像素积累的电子转换成电压信号</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">第四步</div>
+        <div class="pipeline-content">
+          <div class="pipeline-title">电压转换成数字（ADC模数转换）</div>
+          <div class="pipeline-desc">模数转换器把电压信号转换成像素值，输出 RAW 文件</div>
+          <div><span class="noise-tag tag-read">读出噪声在此产生</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">SHOT NOISE · 散粒噪声</div>
+    <h2>第一种：光子散粒噪声</h2>
+    <p>光是由离散的光子组成的，即使光源完全稳定，单位时间内打到某个像素的光子数量也是随机的，这是量子力学的物理本质，无法消除。</p>
+
+    <div class="data-box">
+      <div class="data-label">光子数量的随机性</div>
+      <pre>
+均匀灰色墙壁，每个像素平均应该收到 1000 个光子
+
+实际情况：
+像素1：收到 1023 个光子 → 像素值 1023
+像素2：收到  987 个光子 → 像素值  987
+像素3：收到 1011 个光子 → 像素值 1011
+像素4：收到  995 个光子 → 像素值  995
+
+明明是同一块均匀区域，像素值却高高低低
+这就是噪点的视觉效果</pre>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>暗部为什么噪点多</h3>
+        <p>光子数量服从泊松分布，波动幅度是 √N。暗部光子少，波动比例大；亮部光子多，波动比例小。</p>
+      </div>
+      <div class="card">
+        <h3>能消除吗</h3>
+        <p>不能消除，是物理本质。只能通过增加光子数量（更长曝光、更大光圈）或叠加多帧来降低波动比例。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">DARK CURRENT · 暗电流噪声</div>
+    <h2>第二种：暗电流噪声</h2>
+    <p>传感器硅原子在温度影响下会自发产生热运动，释放出少量电子混进势阱，被误认为是光信号。即使完全遮光，桶里也会有电子积累。</p>
+
+    <div class="insight">
+      <div class="insight-label">桶里渗水的比喻</div>
+      <p>散粒噪声是下雨本身随机，暗电流是桶本身会渗水——不下雨桶里也有水。温度越高热运动越剧烈，暗电流越大。夏天拍星空比冬天噪点多就是这个原因。</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>能校正吗</h3>
+        <p>能，用暗场（Dark Frame）校正。拍完照片后盖上镜头盖，用相同曝光时间和ISO拍一张，这张里只有暗电流噪声，从正片里减去就能消除。天文摄影必做的步骤。</p>
+      </div>
+      <div class="card">
+        <h3>韦伯怎么解决</h3>
+        <p>把传感器冷却到 -233°C，接近绝对零度，硅原子热运动几乎停止，暗电流降到接近零。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">READ NOISE · 读出噪声</div>
+    <h2>第三种：读出噪声</h2>
+    <p>把电子数量转换成数字的过程，电路本身不是完美的，每次转换都有微小随机误差。和光线强弱、曝光时间完全无关，每次读取固定引入一次。</p>
+
+    <div class="data-box">
+      <div class="data-label">读出噪声的体现</div>
+      <pre>
+真实电荷：1000 个电子
+
+多次读出结果：
+第1次：1003
+第2次：997
+第3次：1001
+第4次：999
+第5次：1002
+
+每次读出结果略有不同，这个随机误差就是读出噪声
+和光线无关，是电路的固有特性</pre>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">用量杯量水的比喻</div>
+      <p>散粒噪声是雨量随机，暗电流是桶会渗水，读出噪声是用量杯量桶里水时读数有误差。三种噪声在三个完全不同的环节产生。</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>传感器越好读出噪声越低</h3>
+        <p>读出噪声是衡量传感器质量的核心指标，本质是模数转换电路的精密程度。索尼旗舰机读出噪声已从早期 8 个电子降到 1~2 个电子。</p>
+      </div>
+      <div class="card">
+        <h3>韦伯怎么解决</h3>
+        <p>曝光过程中多次采样，对采样序列做线性拟合。读取 N 次后等效读出噪声降低到单次的 1/√N，和多帧叠加降低散粒噪声是同一个数学原理。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">SUMMARY</div>
+    <h2>三种噪声对比</h2>
+    <div class="data-box">
+      <div class="data-label">来源、特性、处理方法</div>
+      <pre>
+               来源          和曝光关系      处理方法
+散粒噪声   光子数量随机    曝光越足越小    多帧叠加、增加曝光
+暗电流     硅原子热运动    曝光越长越大    暗场校正、降低温度
+读出噪声   ADC电路误差     和曝光无关      多次采样、好传感器</pre>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://www.photonstophotos.net/" target="_blank" class="resource-item">
+        <div class="resource-type">数据库</div>
+        <div class="resource-title">Photons to Photos</div>
+        <div class="resource-desc">各相机传感器读出噪声、动态范围数据库，可以查你的索尼相机具体参数</div>
+      </a>
+      <a href="https://www.clarkvision.com/articles/digital.sensor.performance.summary/" target="_blank" class="resource-item">
+        <div class="resource-type">技术文章</div>
+        <div class="resource-title">Digital Camera Sensor Performance Summary</div>
+        <div class="resource-desc">传感器性能的深度分析，包含各种噪声的测量方法</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../13-deghost/index.html" class="btn-nav">← 去鬼影·HDR合成</a>
+    <a href="../15-snr/index.html" class="btn-nav">信噪比与泊松分布 →</a>
+  </div>
+</main>
+</body>
+</html>

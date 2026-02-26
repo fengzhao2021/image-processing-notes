@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>空域降噪算法 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--accent:#7eb8c9;}
+.card::before{background:var(--accent);}
+.section h2{color:var(--accent);}
+.algo-evolution{
+  display:flex;flex-direction:column;gap:0;margin:20px 0;
+}
+.algo-step{
+  display:flex;gap:0;
+}
+.algo-line{
+  display:flex;flex-direction:column;align-items:center;
+  margin-right:16px;
+}
+.algo-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--accent);flex-shrink:0;margin-top:18px;
+}
+.algo-connector{
+  width:1px;flex:1;background:var(--border2);margin-top:2px;
+}
+.algo-step:last-child .algo-connector{display:none;}
+.algo-content{
+  flex:1;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;padding:16px;
+  margin-bottom:8px;
+}
+.algo-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.algo-idea{font-size:12px;color:var(--muted2);line-height:1.8;margin-bottom:8px;}
+.algo-problem{
+  font-size:11px;color:#c97a7a;
+  font-family:'JetBrains Mono',monospace;
+  border-top:1px solid var(--border);
+  padding-top:8px;margin-top:8px;
+}
+.algo-problem::before{content:"问题：";opacity:0.7;}
+.algo-final .algo-content{border-color:var(--accent);}
+.patch-demo{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:2px;margin:16px 0;max-width:280px;
+}
+.p-cell{
+  width:36px;height:36px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:var(--muted2);
+}
+.p-cell.center{background:rgba(126,184,201,0.2);border-color:var(--accent);color:var(--accent);}
+.p-cell.patch{background:rgba(126,184,201,0.08);border-color:rgba(126,184,201,0.3);}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 03 · 计算摄影</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 03 · 03 · SPATIAL DENOISE</div>
+    <h1 class="page-title"><em>空域降噪算法</em></h1>
+    <p class="page-desc">在单张图像上降噪，利用相邻像素之间的相关性。从高斯模糊到BM3D，每一步都是针对上一个算法的问题做针对性改进。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">TWO TYPES</div>
+    <h2>降噪的两大类</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>空域降噪</h3>
+        <p>在单张图像上操作，借用相邻像素或相似区域的信息来修正当前像素。会有一定细节损失。</p>
+      </div>
+      <div class="card">
+        <h3>时域降噪</h3>
+        <p>利用同一场景的多张图像，相同位置真实信号一致，噪点随机，叠加平均消除噪点。不损失细节，但需要多张图。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">ALGORITHM EVOLUTION</div>
+    <h2>算法演进脉络</h2>
+
+    <div class="algo-evolution">
+      <div class="algo-step">
+        <div class="algo-line"><div class="algo-dot"></div><div class="algo-connector"></div></div>
+        <div class="algo-content">
+          <div class="algo-name">高斯模糊</div>
+          <div class="algo-idea">权重只看距离，距离越近权重越大，对周围像素加权平均</div>
+          <div class="algo-problem">边缘和平坦区域一视同仁，边缘被模糊掉，细节损失严重</div>
+        </div>
+      </div>
+      <div class="algo-step">
+        <div class="algo-line"><div class="algo-dot"></div><div class="algo-connector"></div></div>
+        <div class="algo-content">
+          <div class="algo-name">双边滤波（Bilateral Filter）</div>
+          <div class="algo-idea">权重 = 距离权重 × 像素值差异权重。差异大说明可能是边缘，权重低；差异小说明同一区域，正常参与</div>
+          <div class="algo-problem">只看单个像素值，容易被噪点本身干扰，边缘保护有时失效</div>
+        </div>
+      </div>
+      <div class="algo-step">
+        <div class="algo-line"><div class="algo-dot"></div><div class="algo-connector"></div></div>
+        <div class="algo-content">
+          <div class="algo-name">NLM · 非局部均值（Non-Local Means）</div>
+          <div class="algo-idea">不比较单个像素值，改成比较以该像素为中心的一块区域（patch）的相似度。patch纹理不会因为噪点完全改变，判断更稳定</div>
+          <div class="algo-problem">找到的相似patch只用了中心像素值，patch内其他信息全部浪费掉了</div>
+        </div>
+      </div>
+      <div class="algo-step algo-final">
+        <div class="algo-line"><div class="algo-dot"></div><div class="algo-connector"></div></div>
+        <div class="algo-content">
+          <div class="algo-name">BM3D（Block Matching 3D）· 2007年至今最佳</div>
+          <div class="algo-idea">找到相似patch后，把它们叠成3D块整体处理。深度方向真实信号一致得到增强，噪点随机互相抵消，信息利用最充分</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">BILATERAL FILTER</div>
+    <h2>双边滤波</h2>
+
+    <div class="data-box">
+      <div class="data-label">边缘位置的计算对比</div>
+      <pre>
+边缘：左边天空像素值200，右边山体像素值50
+
+高斯模糊（只看距离）：
+左边200权重0.8，右边50权重0.8
+结果 ≈ 125   边缘被平均掉了
+
+双边滤波（距离×差异）：
+左边200：距离权重0.8 × 差异权重0.9 = 0.72
+右边50：距离权重0.8 × 差异权重0.02 = 0.016
+（右边差值150，差异权重接近0）
+结果 ≈ 197   边缘保留了</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">PYTHON · OPENCV</div>
+      <pre>import cv2
+
+img = cv2.imread("photo.tif")
+
+# d=9 邻域直径
+# sigmaColor=75 值域sigma，越小边缘保护越强
+# sigmaSpace=75 距离sigma，越大模糊范围越大
+result = cv2.bilateralFilter(img, d=9, sigmaColor=75, sigmaSpace=75)</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">NLM</div>
+    <h2>NLM · 非局部均值</h2>
+    <p>patch 是以某个像素为中心的一小块区域，比如 7×7 的正方形，代表这个位置的局部纹理特征。</p>
+
+    <div class="patch-demo">
+      <div class="p-cell"></div><div class="p-cell"></div><div class="p-cell"></div><div class="p-cell"></div><div class="p-cell"></div><div class="p-cell"></div><div class="p-cell"></div>
+      <div class="p-cell"></div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell"></div>
+      <div class="p-cell"></div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell"></div>
+      <div class="p-cell"></div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell center">★</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell"></div>
+      <div class="p-cell"></div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell"></div>
+      <div class="p-cell"></div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell patch">·</div><div class="p-cell"></div>
+      <div class="p-cell"></div><div class="p-cell"></div><div class="p-cell"></div><div class="p-cell"></div><div class="p-cell"></div><div class="p-cell"></div><div class="p-cell"></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted2)">★ 当前像素，蓝色区域是它的 5×5 patch（代表局部纹理特征）</p>
+
+    <div class="data-box">
+      <div class="data-label">NLM 对每个像素做的事情</div>
+      <pre>
+第一步：取出当前像素的 7×7 patch
+第二步：在周围 21×21 搜索窗口（441个候选位置）
+        每个位置也取出一个 7×7 patch
+第三步：比较当前patch和每个候选patch的相似度
+        差异小 → 权重大
+        差异大 → 权重小
+第四步：用权重对441个候选像素的中心值加权平均
+        → 当前像素的输出值
+
+搜索441个位置，每次比较49个像素的patch
+总计算量：比双边滤波大，但效果更好</pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">PYTHON · OPENCV</div>
+      <pre>import cv2
+
+img = cv2.imread("photo.tif")
+
+# h=10 降噪强度，越大越模糊
+# templateWindowSize=7 patch大小（奇数）
+# searchWindowSize=21 搜索范围（奇数）
+result = cv2.fastNlMeansDenoisingColored(img,
+                                          h=10,
+                                          templateWindowSize=7,
+                                          searchWindowSize=21)</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">BM3D</div>
+    <h2>BM3D</h2>
+    <p>BM3D（Block Matching 3D）在 NLM 基础上更进一步：找到相似 patch 后，不只用中心像素，而是把整块 patch 叠成3D块整体处理。</p>
+
+    <div class="data-box">
+      <div class="data-label">BM3D 完整流程</div>
+      <pre>
+第一步：找相似patch
+        对每个像素，在周围搜索纹理相似的块，找32个
+
+第二步：叠成3D块
+        32个 8×8 patch 摞在一起 → 8×8×32 的3D块
+
+第三步：深度方向处理
+        深度方向真实信号一致 → 叠加增强
+        深度方向噪点随机    → 叠加抵消
+        （本质和多帧叠加降噪完全一样）
+
+第四步：还原回原图
+        处理后的patch放回原位，重叠区域加权平均
+
+第五步：第二轮精细处理（维纳滤波）
+        用第一轮结果再做一遍，效果更好</pre>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">BM3D 和多帧叠加的关系</div>
+      <p>多帧叠加：在时间维度找相似帧，叠加消除噪点。BM3D：在空间维度找相似patch，叠加消除噪点。两者是完全相同的思路，只是维度不同。相似patch越多，深度方向信噪比越高，降噪效果越好。</p>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">DCT 是什么（不需要深入）</div>
+      <p>BM3D 在深度方向处理时用了 DCT（离散余弦变换）。直觉是：把像素值换一种表达方式，真实信号集中成少数大系数，噪点分散成很多小系数，把小系数置零再还原，噪点消除信号保留。JPEG 压缩也是用 DCT，只是目的是压缩而不是降噪。工具使用层面不需要深入理解 DCT。</p>
+    </div>
+
+    <div class="code-block">
+      <div class="code-label">PYTHON · BM3D（需要安装库）</div>
+      <pre>pip install bm3d
+
+import bm3d
+import numpy as np
+import cv2
+
+img = cv2.imread("photo.tif", cv2.IMREAD_UNCHANGED).astype(np.float32)
+img_normalized = img / 65535.0  # 归一化到 0-1
+
+# sigma_psd 是噪点强度估计，需要根据实际情况调整
+# 0.1 对应中等噪点
+result = bm3d.bm3d(img_normalized, sigma_psd=0.1)
+
+result_16bit = np.clip(result * 65535, 0, 65535).astype(np.uint16)
+cv2.imwrite("denoised.tif", result_16bit)</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">COMPARISON</div>
+    <h2>算法对比总结</h2>
+    <div class="data-box">
+      <div class="data-label">四种算法横向对比</div>
+      <pre>
+              边缘保护    计算速度    降噪效果    适用场景
+高斯模糊      无          极快        差          预处理
+双边滤波      有          较快        中          实时处理
+NLM           好          慢          好          离线处理
+BM3D          最好        最慢        最好        高质量输出</pre>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://www.ipol.im/pub/art/2011/bcm_nlm/" target="_blank" class="resource-item">
+        <div class="resource-type">论文 · IPOL 2011</div>
+        <div class="resource-title">A Non-Local Algorithm for Image Denoising</div>
+        <div class="resource-desc">NLM 原始论文，附带在线 demo，可以上传图片测试效果</div>
+      </a>
+      <a href="https://webpages.tuni.fi/foi/GCF-BM3D/" target="_blank" class="resource-item">
+        <div class="resource-type">官方页面 · BM3D</div>
+        <div class="resource-title">BM3D 算法主页</div>
+        <div class="resource-desc">BM3D 原作者页面，包含论文、代码和效果对比</div>
+      </a>
+      <a href="https://docs.opencv.org/4.x/d5/d69/tutorial_py_non_local_means.html" target="_blank" class="resource-item">
+        <div class="resource-type">官方教程 · OPENCV</div>
+        <div class="resource-title">Image Denoising · NLM</div>
+        <div class="resource-desc">OpenCV 官方 NLM 降噪教程，包含参数说明和代码示例</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../15-snr/index.html" class="btn-nav">← 信噪比与泊松分布</a>
+    <a href="../index.html" class="btn-nav">返回主页 →</a>
+  </div>
+</main>
+</body>
+</html>

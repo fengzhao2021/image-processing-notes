@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信噪比与泊松分布 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--accent:#c9a84c;}
+.card::before{background:var(--accent);}
+.section h2{color:var(--accent);}
+.snr-table{
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:2px;overflow:hidden;margin:20px 0;
+}
+.snr-table table{width:100%;border-collapse:collapse;}
+.snr-table th{
+  background:rgba(201,168,76,0.08);
+  padding:10px 16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:2px;
+  color:var(--accent);text-align:left;
+  border-bottom:1px solid var(--border2);
+}
+.snr-table td{
+  padding:10px 16px;font-size:12px;
+  color:var(--muted2);
+  border-bottom:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;
+}
+.snr-table td:first-child{color:var(--text);}
+.snr-table tr:last-child td{border-bottom:none;}
+.snr-bar{
+  display:flex;align-items:center;gap:12px;margin:8px 0;
+}
+.snr-bar-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--muted2);min-width:120px;
+}
+.snr-bar-track{
+  flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden;
+}
+.snr-bar-fill{height:100%;background:var(--accent);border-radius:3px;}
+.snr-bar-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--accent);min-width:40px;text-align:right;
+}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 03 · 计算摄影</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 03 · 02 · SNR & POISSON</div>
+    <h1 class="page-title">信噪比 · <em>泊松分布</em></h1>
+    <p class="page-desc">为什么暗部噪点多？为什么叠加多帧能降噪？为什么ETTR有效？这些问题的答案都在泊松分布和信噪比里。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">POISSON DISTRIBUTION</div>
+    <h2>泊松分布</h2>
+    <p>描述单位时间内随机事件发生次数的分布规律。条件是每次事件独立发生，平均发生率固定，但每次具体发生多少次是随机的。</p>
+
+    <div class="insight">
+      <div class="insight-label">公交站的比喻</div>
+      <p>一个公交站平均每小时来5辆车，但每小时实际来几辆是随机的：某小时3辆，某小时7辆，某小时5辆。平均是5，但每次不一样，这个分布就是泊松分布。光子打到传感器也是同样的道理。</p>
+    </div>
+
+    <div class="data-box">
+      <div class="data-label">泊松分布的关键性质</div>
+      <pre>
+平均值 = λ（lambda）
+标准差 = √λ
+
+标准差代表典型的波动幅度。
+λ越大，标准差绝对值越大，但占λ的比例越小：
+
+λ = 10000   标准差 = √10000 = 100   比例 = 1%
+λ = 1000    标准差 = √1000  ≈  32   比例 = 3.2%
+λ = 100     标准差 = √100   =  10   比例 = 10%
+λ = 10      标准差 = √10    ≈   3   比例 = 30%
+
+总量越少，波动比例越大</pre>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">为什么光子服从泊松分布</div>
+      <p>每个光子独立到达传感器，平均光子数固定，每个光子到达时间随机。满足泊松分布的三个条件，所以光子数量天然服从泊松分布，这是物理本质，不是近似。当光子数量很大时，泊松分布的形状接近正态分布，这也是很多降噪算法假设噪点服从高斯分布的原因。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">SNR · 信噪比</div>
+    <h2>信噪比</h2>
+    <p>信噪比（SNR）= 信号强度 / 噪声强度，比值越大图像越干净。</p>
+
+    <div class="data-box">
+      <div class="data-label">对应到照片</div>
+      <pre>
+信号 = 真实的光子数量 λ
+噪声 = 光子数量的波动幅度 = 标准差 = √λ
+
+信噪比 = λ / √λ = √λ
+
+信噪比就等于平均光子数的平方根
+光子越多，信噪比越高</pre>
+    </div>
+
+    <div class="snr-table">
+      <table>
+        <tr><th>光子数量</th><th>标准差</th><th>信噪比</th><th>视觉效果</th></tr>
+        <tr><td>10000</td><td>100</td><td>100</td><td>非常干净</td></tr>
+        <tr><td>1000</td><td>32</td><td>32</td><td>轻微噪点</td></tr>
+        <tr><td>100</td><td>10</td><td>10</td><td>明显噪点</td></tr>
+        <tr><td>10</td><td>3</td><td>3</td><td>噪点严重</td></tr>
+      </table>
+    </div>
+
+    <p>信噪比的视觉参考：</p>
+    <div style="margin:16px 0">
+      <div class="snr-bar"><div class="snr-bar-label">信噪比 &lt; 5</div><div class="snr-bar-track"><div class="snr-bar-fill" style="width:5%"></div></div><div class="snr-bar-val">极差</div></div>
+      <div class="snr-bar"><div class="snr-bar-label">信噪比 5~20</div><div class="snr-bar-track"><div class="snr-bar-fill" style="width:20%"></div></div><div class="snr-bar-val">差</div></div>
+      <div class="snr-bar"><div class="snr-bar-label">信噪比 20~50</div><div class="snr-bar-track"><div class="snr-bar-fill" style="width:50%"></div></div><div class="snr-bar-val">可接受</div></div>
+      <div class="snr-bar"><div class="snr-bar-label">信噪比 &gt; 50</div><div class="snr-bar-track"><div class="snr-bar-fill" style="width:100%"></div></div><div class="snr-bar-val">干净</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">MULTI-FRAME STACKING</div>
+    <h2>多帧叠加为什么能降噪</h2>
+    <p>叠加多张图相当于增加了总光子数量，信噪比随之提升。</p>
+
+    <div class="data-box">
+      <div class="data-label">叠加N张的信噪比提升</div>
+      <pre>
+单张曝光暗部：100个光子  → 信噪比 = √100 = 10
+叠加4张：    400个光子  → 信噪比 = √400 = 20
+叠加16张：  1600个光子  → 信噪比 = √1600 = 40
+叠加100张： 10000个光子 → 信噪比 = √10000 = 100
+
+规律：叠加N张 → 信噪比提升 √N 倍
+
+叠加4张：信噪比 ×2
+叠加9张：信噪比 ×3
+叠加16张：信噪比 ×4
+叠加100张：信噪比 ×10</pre>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">天文摄影叠加几百张的原因</div>
+      <p>不是为了增加曝光时间，而是为了提高信噪比，让暗弱的星云细节从噪点里浮现出来。叠加100张信噪比提升10倍，原来被噪点淹没的细节就能看到了。ARW Stacker 做的就是这件事。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">ETTR</div>
+    <h2>ETTR 为什么有效</h2>
+    <p>向右曝光（Expose To The Right），让直方图尽量靠右但不溢出，暗部收集更多光子，信噪比提升，后期拉回曝光后噪点更少。</p>
+
+    <div class="data-box">
+      <div class="data-label">ETTR 的数学依据</div>
+      <pre>
+正常曝光暗部：100个光子  → 信噪比 10
+ETTR多曝1档：400个光子  → 信噪比 20
+
+后期把曝光拉回来，信号等比例降低
+但信噪比已经提高了，暗部噪点更少
+
+ETTR 本质是在拍摄阶段就增加光子数量
+比后期降噪更有效，因为源头信号更好</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">JAMES WEBB</div>
+    <h2>韦伯望远镜的信噪比极限</h2>
+    <p>韦伯用四个手段把信噪比推到工程极限：</p>
+    <div class="cards">
+      <div class="card">
+        <h3>-233°C 极低温</h3>
+        <p>暗电流降到接近零，消除热噪声。</p>
+      </div>
+      <div class="card">
+        <h3>6.5米超大镜面</h3>
+        <p>收集光子面积是哈勃7倍，光子数量极多，散粒噪声比例极低。</p>
+      </div>
+      <div class="card">
+        <h3>多次采样线性拟合</h3>
+        <p>曝光过程中持续采样，读出噪声降低到单次的 1/√N。</p>
+      </div>
+      <div class="card">
+        <h3>多次观测叠加</h3>
+        <p>同一目标多次观测，地面叠加处理，信噪比再提升 √N 倍。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="resources">
+    <div class="resources-header"><h2>推荐学习资料</h2></div>
+    <div class="resource-grid">
+      <a href="https://en.wikipedia.org/wiki/Poisson_distribution" target="_blank" class="resource-item">
+        <div class="resource-type">参考 · WIKIPEDIA</div>
+        <div class="resource-title">Poisson Distribution</div>
+        <div class="resource-desc">泊松分布的完整数学定义和各种应用场景</div>
+      </a>
+      <a href="https://www.clarkvision.com/articles/signal-to-noise/" target="_blank" class="resource-item">
+        <div class="resource-type">技术文章</div>
+        <div class="resource-title">Signal-to-Noise and Photographic Exposure</div>
+        <div class="resource-desc">摄影中信噪比的详细分析，包含 ETTR 的数学推导</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../14-noise-source/index.html" class="btn-nav">← 噪点的来源</a>
+    <a href="../16-spatial-denoise/index.html" class="btn-nav">空域降噪算法 →</a>
+  </div>
+</main>
+</body>
+</html>

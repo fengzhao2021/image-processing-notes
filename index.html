@@ -337,12 +337,46 @@ body{padding-top:0;}
     </div>
   </div>
 
-  <!-- Layer 3-5 placeholder -->
+  <!-- Layer 3 -->
   <div class="layer-section" style="margin-top:40px">
     <div class="layer-header">
       <div class="layer-num">LAYER 03</div>
       <div class="layer-name">计算摄影</div>
-      <div class="layer-status pending">待开始</div>
+      <div class="layer-status in-progress">学习中</div>
+    </div>
+    <div class="tree-grid">
+      <div class="c1-theme">
+        <a href="14-noise-source/index.html" class="tree-card">
+          <div class="card-num">01 · NOISE SOURCE</div>
+          <div class="card-title">噪点的来源</div>
+          <div class="card-desc">散粒噪声、暗电流、读出噪声，三种来源三个环节</div>
+          <div class="card-tags"><span class="tag verified">完整讲解</span></div>
+        </a>
+      </div>
+      <div class="c2-theme">
+        <a href="15-snr/index.html" class="tree-card">
+          <div class="card-num">02 · SNR & POISSON</div>
+          <div class="card-title">信噪比与泊松分布</div>
+          <div class="card-desc">为什么暗部噪点多，叠加为什么有效，ETTR的数学依据</div>
+          <div class="card-tags"><span class="tag verified">含数学推导</span></div>
+        </a>
+      </div>
+      <div class="c3-theme">
+        <a href="16-spatial-denoise/index.html" class="tree-card">
+          <div class="card-num">03 · SPATIAL DENOISE</div>
+          <div class="card-title">空域降噪算法</div>
+          <div class="card-desc">高斯→双边滤波→NLM→BM3D，每步针对上一个问题改进</div>
+          <div class="card-tags"><span class="tag tool">工具相关</span></div>
+        </a>
+      </div>
+      <div style="opacity:0.4">
+        <div class="tree-card" style="cursor:default;pointer-events:none;">
+          <div class="card-num" style="color:var(--muted)">04 · TONE MAPPING</div>
+          <div class="card-title">色调映射</div>
+          <div class="card-desc">HDR图像如何显示在普通屏幕上</div>
+          <div class="card-tags"><span class="tag">即将开始</span></div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="layer-section" style="margin-top:20px">
