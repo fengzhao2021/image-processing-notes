@@ -23,6 +23,39 @@
   --c7:#b8a87e;
 }
 
+body.light{
+  --bg:#f5f3ef;
+  --surface:#ffffff;
+  --surface2:#f0ede8;
+  --border:#e0dbd2;
+  --border2:#d0cab8;
+  --text:#1a1814;
+  --muted:#a09880;
+  --muted2:#786858;
+  --gold:#a07828;
+  --gold-dim:#c09848;
+  --gold-bright:#805818;
+}
+
+/* ── THEME TOGGLE ── */
+.theme-toggle{
+  position:fixed;bottom:28px;right:28px;
+  width:40px;height:40px;
+  background:var(--surface);
+  border:1px solid var(--border2);
+  border-radius:50%;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  z-index:200;
+  transition:all 0.2s;
+  box-shadow:0 2px 12px rgba(0,0,0,0.3);
+}
+.theme-toggle:hover{
+  border-color:var(--gold);
+  transform:scale(1.08);
+}
+
 body{
   background:var(--bg);
   color:var(--text);

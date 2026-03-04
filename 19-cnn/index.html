@@ -368,5 +368,11 @@ BM3D 降噪 → 手工设计规则区分信号和噪点
     <a href="../index.html" class="btn-nav">返回主页 →</a>
   </div>
 </main>
+<button class="theme-toggle" id="themeBtn" title="切换主题">🌙</button>
+<script>
+const btn=document.getElementById("themeBtn"),body=document.body;
+if(localStorage.getItem("theme")==="light"){body.classList.add("light");btn.textContent="☀️";}
+btn.addEventListener("click",()=>{body.classList.toggle("light");const l=body.classList.contains("light");btn.textContent=l?"☀️":"🌙";localStorage.setItem("theme",l?"light":"dark");});
+</script>
 </body>
 </html>

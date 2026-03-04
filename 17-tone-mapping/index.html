@@ -121,5 +121,11 @@ HDR显示器范围：   10000:1（高端屏幕）</pre>
     <a href="../18-ml/index.html" class="btn-nav">传统机器学习 →</a>
   </div>
 </main>
+<button class="theme-toggle" id="themeBtn" title="切换主题">🌙</button>
+<script>
+const btn=document.getElementById("themeBtn"),body=document.body;
+if(localStorage.getItem("theme")==="light"){body.classList.add("light");btn.textContent="☀️";}
+btn.addEventListener("click",()=>{body.classList.toggle("light");const l=body.classList.contains("light");btn.textContent=l?"☀️":"🌙";localStorage.setItem("theme",l?"light":"dark");});
+</script>
 </body>
 </html>

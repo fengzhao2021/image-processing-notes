@@ -251,5 +251,20 @@ body{padding-top:0;}
   <div class="ft-l">图像处理知识库 · ARW Stacker 工具开发配套笔记</div>
   <div class="ft-r">持续更新中</div>
 </div>
+
+<button class="theme-toggle" id="themeBtn" title="切换主题">🌙</button>
+
+<script>
+const btn = document.getElementById('themeBtn');
+const body = document.body;
+const saved = localStorage.getItem('theme');
+if(saved === 'light'){body.classList.add('light');btn.textContent='☀️';}
+btn.addEventListener('click',()=>{
+  body.classList.toggle('light');
+  const isLight = body.classList.contains('light');
+  btn.textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+});
+</script>
 </body>
 </html>

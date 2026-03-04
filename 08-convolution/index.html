@@ -202,5 +202,11 @@ result_16bit = np.clip(result, 0, 65535).astype(np.uint16)</pre>
     <a href="../09-blur/index.html" class="btn-nav">模糊算法 →</a>
   </div>
 </main>
+<button class="theme-toggle" id="themeBtn" title="切换主题">🌙</button>
+<script>
+const btn=document.getElementById("themeBtn"),body=document.body;
+if(localStorage.getItem("theme")==="light"){body.classList.add("light");btn.textContent="☀️";}
+btn.addEventListener("click",()=>{body.classList.toggle("light");const l=body.classList.contains("light");btn.textContent=l?"☀️":"🌙";localStorage.setItem("theme",l?"light":"dark");});
+</script>
 </body>
 </html>

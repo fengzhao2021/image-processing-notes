@@ -182,5 +182,11 @@ blur_gaussian = cv2.GaussianBlur(img, (15, 15), 0)
     <a href="../10-sharpen/index.html" class="btn-nav">锐化 →</a>
   </div>
 </main>
+<button class="theme-toggle" id="themeBtn" title="切换主题">🌙</button>
+<script>
+const btn=document.getElementById("themeBtn"),body=document.body;
+if(localStorage.getItem("theme")==="light"){body.classList.add("light");btn.textContent="☀️";}
+btn.addEventListener("click",()=>{body.classList.toggle("light");const l=body.classList.contains("light");btn.textContent=l?"☀️":"🌙";localStorage.setItem("theme",l?"light":"dark");});
+</script>
 </body>
 </html>
