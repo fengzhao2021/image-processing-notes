@@ -255,3 +255,4 @@ body{
   .resource-grid{grid-template-columns:1fr;}
 }
 body.light .nav{background:rgba(245,243,239,0.95);border-bottom-color:var(--border2);}
+.cg .a2:only-child .kc,.cg .a3:only-child .kc{max-width:340px;}
