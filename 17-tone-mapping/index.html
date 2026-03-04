@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>色调映射 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--accent:#c9a84c;}
+.card::before{background:var(--accent);}
+.section h2{color:var(--accent);}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 03 · 计算摄影</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 03 · 04 · TONE MAPPING</div>
+    <h1 class="page-title"><em>色调映射</em></h1>
+    <p class="page-desc">包围曝光叠加完之后，合并出来的图动态范围很大，但显示器只能显示有限的亮度范围。色调映射就是解决这个问题的。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">THE PROBLEM</div>
+    <h2>问题是什么</h2>
+
+    <div class="data-box">
+      <div class="data-label">动态范围对比</div>
+      <pre>
+真实世界动态范围：100000:1（晴天室外）
+HDR图像动态范围：  10000:1（包围曝光合并后）
+普通显示器范围：    1000:1（SDR屏幕）
+HDR显示器范围：   10000:1（高端屏幕）</pre>
+    </div>
+
+    <p>把一张10000:1的图直接显示在1000:1的屏幕上，要么高光全白，要么暗部全黑，细节丢失。截断不是色调映射，截断是高光溢出。色调映射要平滑压缩，亮的地方压多，暗的地方压少，让整体看起来自然。</p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">GLOBAL TONE MAPPING</div>
+    <h2>全局色调映射</h2>
+    <p>对整张图用同一条曲线压缩。Gamma曲线就是最简单的全局色调映射：</p>
+
+    <div class="data-box">
+      <div class="data-label">Gamma 曲线</div>
+      <pre>
+输出 = 输入^(1/2.2)
+
+亮部被压缩更多，暗部被压缩更少
+整体动态范围缩小，符合人眼感知</pre>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">问题</div>
+      <p>全局曲线不够灵活，图里不同区域明暗差异很大时，一条曲线照顾不了所有区域。室内拍窗外：顾了窗外就顾不了室内，顾了室内就顾不了窗外。</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">LOCAL TONE MAPPING</div>
+    <h2>局部色调映射</h2>
+    <p>根据每个像素周围区域的平均亮度决定压缩多少，每个像素的压缩程度不一样。</p>
+
+    <div class="data-box">
+      <div class="data-label">局部色调映射原理</div>
+      <pre>
+周围区域很亮（窗外）→ 这个像素压缩更多
+周围区域很暗（室内）→ 这个像素压缩更少
+
+局部背景亮度 = 对亮度图做高斯模糊
+局部对比度   = 原图亮度 / 局部背景亮度
+压缩后亮度   = 局部背景亮度^压缩系数 × 局部对比度</pre>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>和去鬼影的关系</h3>
+        <p>和去鬼影逻辑一样，都是根据局部信息决定每个像素怎么处理，而不是用一个全局参数处理所有像素。</p>
+      </div>
+      <div class="card">
+        <h3>光晕问题（Halo）</h3>
+        <p>边缘两侧亮度差异大，局部背景亮度过渡不自然，边缘出现发光的光晕。早期HDR照片那种"塑料感"就是这个原因。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">LIGHTROOM</div>
+    <h2>Lightroom 的色调映射</h2>
+    <p>Lightroom 的调色本质上就是在设计一条从 HDR 到 SDR 的压缩曲线，只是把它拆成了直觉友好的滑块。</p>
+
+    <div class="data-box">
+      <div class="data-label">各滑块的本质</div>
+      <pre>
+曝光（Exposure）  → 全局亮度偏移，整体上下平移
+高光（Highlights）→ 局部色调映射，只压缩亮部
+阴影（Shadows）   → 局部色调映射，只提亮暗部
+白色色阶（Whites）→ 最亮截断点，决定哪里是纯白
+黑色色阶（Blacks）→ 最暗截断点，决定哪里是纯黑
+色调曲线          → 直接编辑压缩曲线，最灵活</pre>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">你的 TIFF 为什么打开时显示奇怪</div>
+      <p>包围曝光合并后的 TIFF 动态范围很大，Lightroom 打开时用默认曲线做色调映射，默认曲线不一定适合你的图。需要手动调整高光和阴影滑块，重新设计压缩曲线，把想保留的细节区域映射到屏幕可显示范围内。</p>
+    </div>
+
+    <div class="insight">
+      <div class="insight-label">一句话总结</div>
+      <p>色调映射本质就是调整亮度，区别在于保留局部对比度。直接压暗整张图，局部细节相对关系不变，只是整体变暗。色调映射是让亮的地方压多一点，暗的地方压少一点，局部对比度被保护住，细节看起来更丰富。</p>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../16-spatial-denoise/index.html" class="btn-nav">← 空域降噪算法</a>
+    <a href="../18-ml/index.html" class="btn-nav">传统机器学习 →</a>
+  </div>
+</main>
+</body>
+</html>

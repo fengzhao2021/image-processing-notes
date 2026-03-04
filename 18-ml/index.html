@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>传统机器学习 · 图像处理知识库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--accent:#7ab8a0;}
+.card::before{background:var(--accent);}
+.section h2{color:var(--accent);}
+.concept-flow{display:flex;flex-direction:column;gap:0;margin:20px 0;}
+.concept-item{
+  display:flex;gap:16px;padding:14px 20px;
+  background:var(--surface);border:1px solid var(--border2);
+  border-bottom:none;
+}
+.concept-item:first-child{border-radius:2px 2px 0 0;}
+.concept-item:last-child{border-bottom:1px solid var(--border2);border-radius:0 0 2px 2px;}
+.concept-name{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--accent);min-width:140px;padding-top:2px;}
+.concept-desc{font-size:12px;color:var(--muted2);line-height:1.7;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="../index.html" class="nav-home">知识库主页</a>
+  <div class="nav-sep"></div>
+  <div class="nav-title">Layer 04 · 传统机器学习</div>
+</nav>
+<main class="main">
+  <div class="page-header">
+    <div class="page-eyebrow">LAYER 04 · 01 · MACHINE LEARNING</div>
+    <h1 class="page-title"><em>传统机器学习</em></h1>
+    <p class="page-desc">深度学习的地基。这一层讲的所有概念在深度学习里都会直接用到，只是规模从几个参数变成了几千万个参数。</p>
+    <div class="page-header-line"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">CORE CONCEPTS</div>
+    <h2>核心概念总览</h2>
+
+    <div class="concept-flow">
+      <div class="concept-item">
+        <div class="concept-name">回归</div>
+        <div class="concept-desc">在数据点上找一条曲线，用已知数据预测未知数值。比如用ISO和曝光时间预测噪点评分。</div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-name">损失函数</div>
+        <div class="concept-desc">衡量当前曲线有多差。预测值和真实值之间的差距，差距越小模型越好。通常用均方误差：Σ(预测-真实)²</div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-name">梯度下降</div>
+        <div class="concept-desc">往损失减小的方向调整参数，就像蒙眼在山上往最陡的方向下山。重复直到损失足够小。</div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-name">学习率</div>
+        <div class="concept-desc">每次梯度下降走多大步。太大会越过最低点来回震荡，太小收敛太慢。</div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-name">分类</div>
+        <div class="concept-desc">预测离散类别而不是连续数值。最简单的是逻辑回归：线性组合→Sigmoid压缩到0~1→输出概率。</div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-name">过拟合</div>
+        <div class="concept-desc">训练误差很小但测试误差很大，把噪点当成规律学进去了。就像死记硬背考试，原题全对换个说法就不会。</div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-name">训练集/测试集</div>
+        <div class="concept-desc">数据分成两部分，训练集用来训练，测试集完全不碰只用来评估。测试集误差才是模型真实能力的体现。</div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-name">Mini-batch</div>
+        <div class="concept-desc">每次用一小批数据（32张）计算梯度，更新参数。比全量快，比单张稳定。Batch Size越大越稳定但越占显存。</div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-name">Epoch</div>
+        <div class="concept-desc">把全部训练数据过一遍叫一个Epoch。训练神经网络通常需要几十到几百个Epoch。</div>
+      </div>
+      <div class="concept-item">
+        <div class="concept-name">特征工程</div>
+        <div class="concept-desc">把原始数据加工成更适合模型学习的形式：归一化、构造新特征、对数变换、One-Hot编码等。深度学习不太需要，CNN自动学习特征。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">GRADIENT DESCENT</div>
+    <h2>梯度下降</h2>
+
+    <div class="data-box">
+      <div class="data-label">参数更新公式</div>
+      <pre>
+新参数 = 旧参数 - 学习率 × 损失函数对参数的导数
+
+导数告诉你：当前方向损失是增大还是减小
+减去导数   ：往损失减小的方向走一步
+重复       ：直到损失不再减小</pre>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>批量梯度下降</h3>
+        <p>每次用全部数据计算梯度。方向准确但极慢，数据量大时不可用。</p>
+      </div>
+      <div class="card">
+        <h3>随机梯度下降 SGD</h3>
+        <p>每次用1张图。极快但方向噪点大，像喝醉的人下山，总体往下走但路径很乱。</p>
+      </div>
+      <div class="card">
+        <h3>Mini-batch（实际使用）</h3>
+        <p>每次用32张图。速度快，方向比单张稳定，是实际训练神经网络的标准做法。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">OVERFITTING</div>
+    <h2>过拟合与解决方法</h2>
+
+    <div class="insight">
+      <div class="insight-label">核心问题</div>
+      <p>模型太复杂，把训练数据里的噪点和特殊情况都记住了，而不是学到真实规律。训练误差很小但面对新数据表现很差。</p>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>更多数据</h3>
+        <p>最直接有效。数据越多，噪点影响越小，模型越难把噪点当规律学。</p>
+      </div>
+      <div class="card">
+        <h3>降低模型复杂度</h3>
+        <p>用更简单的模型，减少参数数量，减少过拟合空间。</p>
+      </div>
+      <div class="card">
+        <h3>正则化</h3>
+        <p>在损失函数里加惩罚项：总损失 = 预测误差 + λ×参数大小。惩罚参数太大，强迫模型保持简单。</p>
+      </div>
+      <div class="card">
+        <h3>Dropout</h3>
+        <p>深度学习专用，训练时随机关掉神经元，强迫模型不依赖任何单个神经元。Layer 05细讲。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">RELATION TO DEEP LEARNING</div>
+    <h2>和深度学习的关系</h2>
+
+    <div class="data-box">
+      <div class="data-label">本质完全相同，规模不同</div>
+      <pre>
+传统机器学习：
+  几个到几百个参数
+  手工设计特征
+  损失函数 → 梯度下降 → 更新参数
+
+深度学习：
+  几百万到几百亿个参数
+  自动学习特征
+  损失函数 → 梯度下降 → 更新参数（5000万个）
+
+原理完全一样，规模不同</pre>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="../17-tone-mapping/index.html" class="btn-nav">← 色调映射</a>
+    <a href="../19-cnn/index.html" class="btn-nav">CNN深度学习 →</a>
+  </div>
+</main>
+</body>
+</html>
