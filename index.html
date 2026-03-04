@@ -7,250 +7,249 @@
 <link rel="stylesheet" href="assets/style.css">
 <style>
 body{padding-top:0;}
-.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:80px 40px 60px;position:relative;overflow:hidden;}
-.hero-bg{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 15% 20%,rgba(126,184,201,0.05) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 85% 80%,rgba(201,168,76,0.04) 0%,transparent 60%),radial-gradient(ellipse 40% 40% at 50% 50%,rgba(201,138,184,0.03) 0%,transparent 60%);}
-.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:6px;color:var(--gold-dim);margin-bottom:28px;opacity:0;animation:fadeUp 0.8s 0.2s forwards;}
-.hero h1{font-size:clamp(36px,6vw,72px);font-weight:300;letter-spacing:6px;line-height:1.1;margin-bottom:24px;opacity:0;animation:fadeUp 0.8s 0.4s forwards;}
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:80px 40px 60px;position:relative;}
+.hero-bg{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 50% at 20% 15%,rgba(126,184,201,0.06) 0%,transparent 55%),radial-gradient(ellipse 50% 60% at 80% 85%,rgba(201,168,76,0.05) 0%,transparent 55%),radial-gradient(ellipse 30% 30% at 60% 40%,rgba(201,138,184,0.03) 0%,transparent 50%);}
+.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:6px;color:var(--gold-dim);margin-bottom:24px;opacity:0;animation:fadeUp 0.7s 0.1s forwards;}
+.hero h1{font-size:clamp(28px,4.5vw,58px);font-weight:300;letter-spacing:5px;line-height:1.15;margin-bottom:20px;opacity:0;animation:fadeUp 0.7s 0.3s forwards;}
 .hero h1 em{font-style:normal;color:var(--gold);}
-.hero-desc{font-size:14px;color:var(--muted2);max-width:460px;line-height:2;margin-bottom:56px;opacity:0;animation:fadeUp 0.8s 0.6s forwards;}
-.progress-overview{width:100%;max-width:680px;background:var(--surface);border:1px solid var(--border2);border-radius:2px;padding:28px 32px;margin-bottom:48px;opacity:0;animation:fadeUp 0.8s 0.8s forwards;}
-.progress-overview-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:20px;text-align:left;}
-.layer-progress-list{display:flex;flex-direction:column;gap:10px;}
-.layer-progress-item{display:grid;grid-template-columns:90px 1fr 80px;align-items:center;gap:16px;}
-.lpi-name{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted2);text-align:left;}
-.lpi-bar{height:2px;background:var(--border2);border-radius:2px;}
-.lpi-fill{height:100%;border-radius:2px;}
-.lpi-fill.done{background:var(--c2);}
-.lpi-fill.active{background:linear-gradient(to right,var(--gold-dim),var(--gold));}
-.lpi-status{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;text-align:right;}
-.lpi-status.done{color:var(--c2);}
-.lpi-status.active{color:var(--gold);}
-.lpi-status.pending{color:var(--muted);}
-.stats-row{display:flex;gap:2px;width:100%;max-width:680px;margin-bottom:64px;opacity:0;animation:fadeUp 0.8s 1s forwards;}
-.stat-item{flex:1;background:var(--surface);border:1px solid var(--border2);padding:16px 20px;text-align:center;}
-.stat-num{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:300;color:var(--gold);letter-spacing:2px;margin-bottom:6px;}
-.stat-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
-.scroll-hint{display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;animation:fadeUp 0.8s 1.2s forwards;}
-.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,var(--gold-dim),transparent);}
-.scroll-text{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--muted);}
-.content{padding:0 40px 120px;max-width:1160px;margin:0 auto;}
-.layer-block{margin-bottom:80px;}
-.layer-head{display:flex;align-items:baseline;gap:20px;padding:0 0 20px;border-bottom:1px solid var(--border2);margin-bottom:24px;}
-.layer-id{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--gold-dim);}
-.layer-title{font-size:18px;font-weight:600;color:var(--text);letter-spacing:1px;}
-.layer-count{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-left:auto;}
-.lbs{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;padding:3px 10px;border-radius:2px;}
-.lbs.done{color:var(--c2);background:rgba(168,201,138,0.1);border:1px solid rgba(168,201,138,0.2);}
-.lbs.active{color:var(--gold);background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.2);}
-.lbs.pending{color:var(--muted);background:var(--surface);border:1px solid var(--border2);}
-.card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-.k-card{background:var(--surface);border:1px solid var(--border2);border-radius:2px;padding:20px 16px;text-decoration:none;text-align:left;transition:all 0.2s;position:relative;display:block;overflow:hidden;}
-.k-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;opacity:0.5;transition:opacity 0.2s;}
-.k-card:hover{border-color:rgba(255,255,255,0.12);transform:translateY(-2px);}
-.k-card:hover::before{opacity:1;}
-.k-card-num{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;margin-bottom:10px;opacity:0.5;}
-.k-card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.3;}
-.k-card-desc{font-size:11px;color:var(--muted2);line-height:1.6;margin-bottom:14px;}
-.k-card-tags{display:flex;flex-wrap:wrap;gap:4px;}
-.k-tag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;padding:2px 7px;border-radius:2px;color:var(--muted2);background:var(--border);}
-.k-tag.v{color:var(--c2);background:rgba(168,201,138,0.1);}
-.k-tag.t{color:var(--gold);background:rgba(201,168,76,0.08);}
-.k-tag.w{color:var(--c5);background:rgba(201,122,122,0.1);}
-.t1 .k-card::before{background:var(--c1);}.t1 .k-card-num{color:var(--c1);}
-.t2 .k-card::before{background:var(--c2);}.t2 .k-card-num{color:var(--c2);}
-.t3 .k-card::before{background:var(--c3);}.t3 .k-card-num{color:var(--c3);}
-.t4 .k-card::before{background:var(--c4);}.t4 .k-card-num{color:var(--c4);}
-.t5 .k-card::before{background:var(--c5);}.t5 .k-card-num{color:var(--c5);}
-.t6 .k-card::before{background:var(--c6);}.t6 .k-card-num{color:var(--c6);}
-.t7 .k-card::before{background:var(--c7);}.t7 .k-card-num{color:var(--c7);}
-.updates-section{margin-bottom:80px;border:1px solid var(--border2);border-radius:2px;overflow:hidden;}
-.updates-head{padding:16px 24px;background:var(--surface);border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:12px;}
-.updates-head-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--gold-dim);}
-.updates-head-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:pulse 2s infinite;margin-left:auto;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
-.update-item{display:flex;align-items:center;gap:20px;padding:14px 24px;border-bottom:1px solid var(--border2);text-decoration:none;transition:background 0.15s;}
-.update-item:last-child{border-bottom:none;}
-.update-item:hover{background:rgba(255,255,255,0.02);}
-.update-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);min-width:60px;}
-.update-layer{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;padding:2px 8px;border-radius:2px;min-width:80px;text-align:center;}
-.update-title{font-size:13px;color:var(--text);}
-.update-desc{font-size:11px;color:var(--muted2);margin-left:auto;}
-.site-footer{padding:32px 40px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center;}
-.footer-left{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);}
-.footer-right{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-@media(max-width:900px){.card-grid{grid-template-columns:repeat(2,1fr);}.stats-row{display:grid;grid-template-columns:repeat(2,1fr);}}
-@media(max-width:500px){.card-grid{grid-template-columns:1fr;}.hero{padding:80px 20px 60px;}.content{padding:0 20px 80px;}.update-desc{display:none;}.layer-progress-item{grid-template-columns:70px 1fr 60px;}}
+.hero-desc{font-size:13px;color:var(--muted2);max-width:420px;line-height:2;margin-bottom:48px;opacity:0;animation:fadeUp 0.7s 0.5s forwards;}
+
+/* ── PROGRESS ── */
+.progress-box{width:100%;max-width:620px;background:var(--surface);border:1px solid var(--border2);border-radius:2px;padding:24px 28px;margin-bottom:16px;opacity:0;animation:fadeUp 0.7s 0.7s forwards;}
+.pb-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:18px;text-align:left;}
+.pb-row{display:grid;grid-template-columns:80px 1fr 60px;align-items:center;gap:14px;margin-bottom:8px;}
+.pb-row:last-child{margin-bottom:0;}
+.pb-name{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted2);}
+.pb-track{height:2px;background:var(--border2);border-radius:2px;}
+.pb-fill{height:100%;border-radius:2px;}
+.pb-fill.done{background:var(--c2);}
+.pb-fill.active{background:linear-gradient(90deg,var(--gold-dim),var(--gold));}
+.pb-txt{font-family:'JetBrains Mono',monospace;font-size:9px;text-align:right;}
+.pb-txt.done{color:var(--c2);}
+.pb-txt.active{color:var(--gold);}
+
+/* ── STATS ── */
+.stats{display:flex;gap:2px;width:100%;max-width:620px;margin-bottom:56px;opacity:0;animation:fadeUp 0.7s 0.9s forwards;}
+.stat{flex:1;background:var(--surface);border:1px solid var(--border2);padding:14px 0;text-align:center;}
+.stat-n{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:300;color:var(--gold);letter-spacing:2px;margin-bottom:5px;}
+.stat-l{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);}
+
+/* ── SCROLL ── */
+.scroll-hint{display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;animation:fadeUp 0.7s 1.1s forwards;}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--gold-dim),transparent);}
+.scroll-txt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--muted);}
+
+/* ── CONTENT ── */
+.content{padding:60px 48px 120px;max-width:1200px;margin:0 auto;}
+
+/* ── UPDATES ── */
+.updates{margin-bottom:72px;border:1px solid var(--border2);border-radius:2px;overflow:hidden;}
+.updates-hd{padding:14px 22px;background:var(--surface);border-bottom:1px solid var(--border2);display:flex;align-items:center;}
+.updates-hd-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--gold-dim);}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold);animation:pulse 2s infinite;margin-left:auto;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.2;}}
+.upd-row{display:grid;grid-template-columns:64px 90px 1fr auto;align-items:center;gap:16px;padding:12px 22px;border-bottom:1px solid var(--border2);text-decoration:none;transition:background 0.15s;}
+.upd-row:last-child{border-bottom:none;}
+.upd-row:hover{background:rgba(255,255,255,0.02);}
+.upd-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.upd-layer{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;padding:2px 8px;border-radius:2px;text-align:center;}
+.upd-title{font-size:13px;color:var(--text);}
+.upd-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;}
+
+/* ── LAYER BLOCK ── */
+.layer-block{margin-bottom:64px;}
+.layer-hd{display:flex;align-items:center;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--border2);margin-bottom:20px;}
+.layer-id{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--gold-dim);}
+.layer-ttl{font-size:17px;font-weight:600;color:var(--text);}
+.layer-cnt{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-left:auto;}
+.lbadge{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;padding:3px 10px;border-radius:2px;}
+.lbadge.done{color:var(--c2);background:rgba(168,201,138,0.1);border:1px solid rgba(168,201,138,0.25);}
+.lbadge.active{color:var(--gold);background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);}
+
+/* ── CARD GRID ── */
+.cg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.cg.wide{grid-template-columns:repeat(3,1fr);}
+
+.kc{background:var(--surface);border:1px solid var(--border2);border-radius:2px;padding:18px 16px;text-decoration:none;display:flex;flex-direction:column;transition:all 0.18s;position:relative;overflow:hidden;}
+.kc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;opacity:0.4;transition:opacity 0.18s;}
+.kc:hover{border-color:rgba(255,255,255,0.1);transform:translateY(-2px);}
+.kc:hover::before{opacity:1;}
+.kc-num{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;margin-bottom:10px;opacity:0.5;}
+.kc-ttl{font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.3;}
+.kc-desc{font-size:11px;color:var(--muted2);line-height:1.65;flex:1;margin-bottom:14px;}
+.kc-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;}
+.kt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;padding:2px 6px;border-radius:2px;color:var(--muted2);background:var(--border);}
+.kt.v{color:var(--c2);background:rgba(168,201,138,0.1);}
+.kt.t{color:var(--gold);background:rgba(201,168,76,0.08);}
+.kt.w{color:var(--c5);background:rgba(201,122,122,0.1);}
+
+/* theme accent colors */
+.a1 .kc::before{background:var(--c1);}.a1 .kc-num{color:var(--c1);}
+.a2 .kc::before{background:var(--c2);}.a2 .kc-num{color:var(--c2);}
+.a3 .kc::before{background:var(--c3);}.a3 .kc-num{color:var(--c3);}
+.a4 .kc::before{background:var(--c4);}.a4 .kc-num{color:var(--c4);}
+.a5 .kc::before{background:var(--c5);}.a5 .kc-num{color:var(--c5);}
+.a6 .kc::before{background:var(--c6);}.a6 .kc-num{color:var(--c6);}
+.a7 .kc::before{background:var(--c7);}.a7 .kc-num{color:var(--c7);}
+
+/* ── FOOTER ── */
+.ft{padding:28px 48px;border-top:1px solid var(--border2);display:flex;justify-content:space-between;}
+.ft-l,.ft-r{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:960px){.cg{grid-template-columns:repeat(2,1fr);}.cg.wide{grid-template-columns:repeat(2,1fr);}.stats{display:grid;grid-template-columns:repeat(2,1fr);}}
+@media(max-width:520px){.cg,.cg.wide{grid-template-columns:1fr;}.hero{padding:80px 20px 60px;}.content{padding:40px 20px 80px;}.upd-tag{display:none;}.upd-row{grid-template-columns:54px 80px 1fr;}}
 </style>
 </head>
 <body>
 <div class="hero-bg"></div>
+
 <div class="hero">
   <div class="hero-eyebrow">赵师傅 · 图像处理自学笔记</div>
   <h1>图像处理<br><em>知识体系</em></h1>
   <p class="hero-desc">从 RAW 文件到深度学习，系统梳理图像处理五层知识，结合 ARW Stacker 工具开发实践。</p>
 
-  <div class="progress-overview">
-    <div class="progress-overview-label">LEARNING PROGRESS</div>
-    <div class="layer-progress-list">
-      <div class="layer-progress-item">
-        <div class="lpi-name">LAYER 01</div>
-        <div class="lpi-bar"><div class="lpi-fill done" style="width:100%"></div></div>
-        <div class="lpi-status done">已完成</div>
-      </div>
-      <div class="layer-progress-item">
-        <div class="lpi-name">LAYER 02</div>
-        <div class="lpi-bar"><div class="lpi-fill done" style="width:100%"></div></div>
-        <div class="lpi-status done">已完成</div>
-      </div>
-      <div class="layer-progress-item">
-        <div class="lpi-name">LAYER 03</div>
-        <div class="lpi-bar"><div class="lpi-fill done" style="width:100%"></div></div>
-        <div class="lpi-status done">已完成</div>
-      </div>
-      <div class="layer-progress-item">
-        <div class="lpi-name">LAYER 04</div>
-        <div class="lpi-bar"><div class="lpi-fill done" style="width:100%"></div></div>
-        <div class="lpi-status done">已完成</div>
-      </div>
-      <div class="layer-progress-item">
-        <div class="lpi-name">LAYER 05</div>
-        <div class="lpi-bar"><div class="lpi-fill active" style="width:30%"></div></div>
-        <div class="lpi-status active">学习中</div>
-      </div>
-    </div>
+  <div class="progress-box">
+    <div class="pb-label">LEARNING PROGRESS</div>
+    <div class="pb-row"><div class="pb-name">LAYER 01</div><div class="pb-track"><div class="pb-fill done" style="width:100%"></div></div><div class="pb-txt done">已完成</div></div>
+    <div class="pb-row"><div class="pb-name">LAYER 02</div><div class="pb-track"><div class="pb-fill done" style="width:100%"></div></div><div class="pb-txt done">已完成</div></div>
+    <div class="pb-row"><div class="pb-name">LAYER 03</div><div class="pb-track"><div class="pb-fill done" style="width:100%"></div></div><div class="pb-txt done">已完成</div></div>
+    <div class="pb-row"><div class="pb-name">LAYER 04</div><div class="pb-track"><div class="pb-fill done" style="width:100%"></div></div><div class="pb-txt done">已完成</div></div>
+    <div class="pb-row"><div class="pb-name">LAYER 05</div><div class="pb-track"><div class="pb-fill active" style="width:30%"></div></div><div class="pb-txt active">学习中</div></div>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-item"><div class="stat-num">19</div><div class="stat-label">PAGES</div></div>
-    <div class="stat-item"><div class="stat-num">5</div><div class="stat-label">LAYERS</div></div>
-    <div class="stat-item"><div class="stat-num">4</div><div class="stat-label">DONE</div></div>
-    <div class="stat-item"><div class="stat-num">7</div><div class="stat-label">DAYS</div></div>
+  <div class="stats">
+    <div class="stat"><div class="stat-n">19</div><div class="stat-l">PAGES</div></div>
+    <div class="stat"><div class="stat-n">5</div><div class="stat-l">LAYERS</div></div>
+    <div class="stat"><div class="stat-n">4</div><div class="stat-l">DONE</div></div>
+    <div class="stat"><div class="stat-n">7</div><div class="stat-l">DAYS</div></div>
   </div>
 
   <div class="scroll-hint">
     <div class="scroll-line"></div>
-    <div class="scroll-text">SCROLL</div>
+    <div class="scroll-txt">SCROLL</div>
   </div>
 </div>
 
 <div class="content">
 
-  <div class="updates-section">
-    <div class="updates-head">
-      <div class="updates-head-label">RECENT UPDATES</div>
-      <div class="updates-head-dot"></div>
+  <!-- RECENT UPDATES -->
+  <div class="updates">
+    <div class="updates-hd">
+      <div class="updates-hd-lbl">RECENT UPDATES</div>
+      <div class="live-dot"></div>
     </div>
-    <a href="19-cnn/index.html" class="update-item">
-      <div class="update-date">Mar 04</div>
-      <div class="update-layer" style="color:var(--c3);background:rgba(201,138,184,0.1);border:1px solid rgba(201,138,184,0.2);">LAYER 05</div>
-      <div class="update-title">卷积神经网络 · ResNet-50实战可视化</div>
-      <div class="update-desc">含4张特征图实验</div>
+    <a href="19-cnn/index.html" class="upd-row">
+      <div class="upd-date">Mar 04</div>
+      <div class="upd-layer" style="color:var(--c3);background:rgba(201,138,184,0.12);border:1px solid rgba(201,138,184,0.25);">LAYER 05</div>
+      <div class="upd-title">卷积神经网络 · ResNet-50实战可视化</div>
+      <div class="upd-tag">含4张特征图实验</div>
     </a>
-    <a href="18-ml/index.html" class="update-item">
-      <div class="update-date">Mar 04</div>
-      <div class="update-layer" style="color:var(--c2);background:rgba(168,201,138,0.1);border:1px solid rgba(168,201,138,0.2);">LAYER 04</div>
-      <div class="update-title">传统机器学习 · 梯度下降到神经网络</div>
-      <div class="update-desc">深度学习地基</div>
+    <a href="18-ml/index.html" class="upd-row">
+      <div class="upd-date">Mar 04</div>
+      <div class="upd-layer" style="color:var(--c2);background:rgba(168,201,138,0.12);border:1px solid rgba(168,201,138,0.25);">LAYER 04</div>
+      <div class="upd-title">传统机器学习 · 梯度下降到神经网络</div>
+      <div class="upd-tag">深度学习地基</div>
     </a>
-    <a href="17-tone-mapping/index.html" class="update-item">
-      <div class="update-date">Mar 03</div>
-      <div class="update-layer" style="color:var(--c1);background:rgba(126,184,201,0.1);border:1px solid rgba(126,184,201,0.2);">LAYER 03</div>
-      <div class="update-title">色调映射 · Lightroom滑块的本质</div>
-      <div class="update-desc">局部vs全局压缩</div>
+    <a href="17-tone-mapping/index.html" class="upd-row">
+      <div class="upd-date">Mar 03</div>
+      <div class="upd-layer" style="color:var(--c1);background:rgba(126,184,201,0.12);border:1px solid rgba(126,184,201,0.25);">LAYER 03</div>
+      <div class="upd-title">色调映射 · Lightroom 滑块的本质</div>
+      <div class="upd-tag">局部 vs 全局压缩</div>
     </a>
-    <a href="16-spatial-denoise/index.html" class="update-item">
-      <div class="update-date">Mar 02</div>
-      <div class="update-layer" style="color:var(--c1);background:rgba(126,184,201,0.1);border:1px solid rgba(126,184,201,0.2);">LAYER 03</div>
-      <div class="update-title">空域降噪算法 · 高斯到BM3D的演进</div>
-      <div class="update-desc">工具相关</div>
+    <a href="16-spatial-denoise/index.html" class="upd-row">
+      <div class="upd-date">Mar 02</div>
+      <div class="upd-layer" style="color:var(--c1);background:rgba(126,184,201,0.12);border:1px solid rgba(126,184,201,0.25);">LAYER 03</div>
+      <div class="upd-title">空域降噪算法 · 高斯到 BM3D 的演进</div>
+      <div class="upd-tag">工具相关</div>
     </a>
   </div>
 
   <!-- LAYER 01 -->
   <div class="layer-block">
-    <div class="layer-head">
+    <div class="layer-hd">
       <div class="layer-id">LAYER 01</div>
-      <div class="layer-title">数字图像的本质</div>
-      <div class="layer-count">7 pages</div>
-      <div class="lbs done">已完成</div>
+      <div class="layer-ttl">数字图像的本质</div>
+      <div class="layer-cnt">7 pages</div>
+      <div class="lbadge done">已完成</div>
     </div>
-    <div class="card-grid">
-      <div class="t1"><a href="01-image-array/index.html" class="k-card"><div class="k-card-num">01 · IMAGE</div><div class="k-card-title">图像是数组</div><div class="k-card-desc">三维数组结构，像素即数字，所有处理本质是数学运算</div><div class="k-card-tags"><span class="k-tag v">亲测验证</span></div></a></div>
-      <div class="t2"><a href="02-sensor-raw/index.html" class="k-card"><div class="k-card-num">02 · SENSOR</div><div class="k-card-title">传感器与RAW</div><div class="k-card-desc">光电转换、拜耳阵列、去马赛克、色彩伪影、暗电流噪声</div><div class="k-card-tags"><span class="k-tag v">亲测验证</span><span class="k-tag t">工具相关</span></div></a></div>
-      <div class="t3"><a href="03-color/index.html" class="k-card"><div class="k-card-num">03 · COLOR</div><div class="k-card-title">颜色的来源</div><div class="k-card-desc">RGB通道、Y亮度、RAW解码的唯一机会</div><div class="k-card-tags"><span class="k-tag t">工具相关</span></div></a></div>
-      <div class="t4"><a href="04-bit-depth/index.html" class="k-card"><div class="k-card-num">04 · BIT</div><div class="k-card-title">位深</div><div class="k-card-desc">bit原理、8/14/16bit区别、索尼量化压缩、无损压缩原理</div><div class="k-card-tags"><span class="k-tag v">亲测验证</span><span class="k-tag t">工具相关</span></div></a></div>
-      <div class="t5"><a href="05-histogram/index.html" class="k-card"><div class="k-card-num">05 · HISTOGRAM</div><div class="k-card-title">直方图</div><div class="k-card-desc">亮度分布可视化、判断曝光、ETTR向右曝光技巧</div><div class="k-card-tags"><span class="k-tag v">亲测验证</span><span class="k-tag t">工具相关</span></div></a></div>
-      <div class="t6"><a href="06-color-space/index.html" class="k-card"><div class="k-card-num">06 · COLOR SPACE</div><div class="k-card-title">色彩空间</div><div class="k-card-desc">sRGB/Adobe RGB/ProPhoto，数字与颜色的对应标准</div><div class="k-card-tags"><span class="k-tag t">工具相关</span></div></a></div>
-      <div class="t7"><a href="07-gamma/index.html" class="k-card"><div class="k-card-num">07 · GAMMA</div><div class="k-card-title">Gamma曲线</div><div class="k-card-desc">人眼非线性感知、Gamma 2.2、线性空间处理</div><div class="k-card-tags"><span class="k-tag t">工具相关</span></div></a></div>
+    <div class="cg">
+      <div class="a1"><a href="01-image-array/index.html" class="kc"><div class="kc-num">01 · IMAGE</div><div class="kc-ttl">图像是数组</div><div class="kc-desc">三维数组结构，像素即数字，所有处理本质是数学运算</div><div class="kc-tags"><span class="kt v">亲测验证</span></div></a></div>
+      <div class="a2"><a href="02-sensor-raw/index.html" class="kc"><div class="kc-num">02 · SENSOR</div><div class="kc-ttl">传感器与RAW</div><div class="kc-desc">光电转换、拜耳阵列、去马赛克、色彩伪影、暗电流噪声</div><div class="kc-tags"><span class="kt v">亲测验证</span><span class="kt t">工具相关</span></div></a></div>
+      <div class="a3"><a href="03-color/index.html" class="kc"><div class="kc-num">03 · COLOR</div><div class="kc-ttl">颜色的来源</div><div class="kc-desc">RGB通道、Y亮度、RAW解码的唯一机会</div><div class="kc-tags"><span class="kt t">工具相关</span></div></a></div>
+      <div class="a4"><a href="04-bit-depth/index.html" class="kc"><div class="kc-num">04 · BIT</div><div class="kc-ttl">位深</div><div class="kc-desc">bit原理、8/14/16bit区别、索尼量化压缩、无损压缩原理</div><div class="kc-tags"><span class="kt v">亲测验证</span><span class="kt t">工具相关</span></div></a></div>
+      <div class="a5"><a href="05-histogram/index.html" class="kc"><div class="kc-num">05 · HISTOGRAM</div><div class="kc-ttl">直方图</div><div class="kc-desc">亮度分布可视化、判断曝光、ETTR向右曝光技巧</div><div class="kc-tags"><span class="kt v">亲测验证</span><span class="kt t">工具相关</span></div></a></div>
+      <div class="a6"><a href="06-color-space/index.html" class="kc"><div class="kc-num">06 · COLOR SPACE</div><div class="kc-ttl">色彩空间</div><div class="kc-desc">sRGB / Adobe RGB / ProPhoto，数字与颜色的对应标准</div><div class="kc-tags"><span class="kt t">工具相关</span></div></a></div>
+      <div class="a7"><a href="07-gamma/index.html" class="kc"><div class="kc-num">07 · GAMMA</div><div class="kc-ttl">Gamma 曲线</div><div class="kc-desc">人眼非线性感知、Gamma 2.2、线性空间处理</div><div class="kc-tags"><span class="kt t">工具相关</span></div></a></div>
     </div>
   </div>
 
   <!-- LAYER 02 -->
   <div class="layer-block">
-    <div class="layer-head">
+    <div class="layer-hd">
       <div class="layer-id">LAYER 02</div>
-      <div class="layer-title">经典图像处理算法</div>
-      <div class="layer-count">6 pages</div>
-      <div class="lbs done">已完成</div>
+      <div class="layer-ttl">经典图像处理算法</div>
+      <div class="layer-cnt">6 pages</div>
+      <div class="lbadge done">已完成</div>
     </div>
-    <div class="card-grid">
-      <div class="t1"><a href="08-convolution/index.html" class="k-card"><div class="k-card-num">01 · CONVOLUTION</div><div class="k-card-title">卷积核</div><div class="k-card-desc">所有算法的基础操作，核总和规律，截断原理</div><div class="k-card-tags"><span class="k-tag v">亲测验证</span></div></a></div>
-      <div class="t2"><a href="09-blur/index.html" class="k-card"><div class="k-card-num">02 · BLUR</div><div class="k-card-title">模糊算法</div><div class="k-card-desc">均值模糊 vs 高斯模糊，权重分配的差异</div><div class="k-card-tags"><span class="k-tag v">完整演算</span></div></a></div>
-      <div class="t3"><a href="10-sharpen/index.html" class="k-card"><div class="k-card-num">03 · SHARPEN</div><div class="k-card-title">锐化</div><div class="k-card-desc">模糊的反面，放大像素与周围的差距</div><div class="k-card-tags"><span class="k-tag v">完整演算</span></div></a></div>
-      <div class="t4"><a href="11-edge-detection/index.html" class="k-card"><div class="k-card-num">04 · EDGE</div><div class="k-card-title">边缘检测</div><div class="k-card-desc">Sobel算子，横纵向合并，核总和为0的意义</div><div class="k-card-tags"><span class="k-tag v">完整演算</span></div></a></div>
-      <div class="t5"><a href="12-image-align/index.html" class="k-card"><div class="k-card-num">05 · ALIGN ⚑</div><div class="k-card-title">图像对齐·ECC</div><div class="k-card-desc">变换矩阵、相关性计算、迭代优化，需要二次深入</div><div class="k-card-tags"><span class="k-tag w">需补前置数学</span><span class="k-tag t">工具相关</span></div></a></div>
-      <div class="t6"><a href="13-deghost/index.html" class="k-card"><div class="k-card-num">06 · DEGHOST</div><div class="k-card-title">去鬼影·HDR合成</div><div class="k-card-desc">软权重检测移动区域，曝光权重合并，完整包围曝光流程</div><div class="k-card-tags"><span class="k-tag t">工具相关</span></div></a></div>
+    <div class="cg">
+      <div class="a1"><a href="08-convolution/index.html" class="kc"><div class="kc-num">01 · CONVOLUTION</div><div class="kc-ttl">卷积核</div><div class="kc-desc">所有算法的基础操作，核总和规律，截断原理</div><div class="kc-tags"><span class="kt v">亲测验证</span></div></a></div>
+      <div class="a2"><a href="09-blur/index.html" class="kc"><div class="kc-num">02 · BLUR</div><div class="kc-ttl">模糊算法</div><div class="kc-desc">均值模糊 vs 高斯模糊，权重分配的差异</div><div class="kc-tags"><span class="kt v">完整演算</span></div></a></div>
+      <div class="a3"><a href="10-sharpen/index.html" class="kc"><div class="kc-num">03 · SHARPEN</div><div class="kc-ttl">锐化</div><div class="kc-desc">模糊的反面，放大像素与周围的差距</div><div class="kc-tags"><span class="kt v">完整演算</span></div></a></div>
+      <div class="a4"><a href="11-edge-detection/index.html" class="kc"><div class="kc-num">04 · EDGE</div><div class="kc-ttl">边缘检测</div><div class="kc-desc">Sobel算子，横纵向合并，核总和为0的意义</div><div class="kc-tags"><span class="kt v">完整演算</span></div></a></div>
+      <div class="a5"><a href="12-image-align/index.html" class="kc"><div class="kc-num">05 · ALIGN ⚑</div><div class="kc-ttl">图像对齐 · ECC</div><div class="kc-desc">变换矩阵、相关性计算、迭代优化，需要二次深入</div><div class="kc-tags"><span class="kt w">需补前置数学</span><span class="kt t">工具相关</span></div></a></div>
+      <div class="a6"><a href="13-deghost/index.html" class="kc"><div class="kc-num">06 · DEGHOST</div><div class="kc-ttl">去鬼影 · HDR合成</div><div class="kc-desc">软权重检测移动区域，曝光权重合并，完整包围曝光流程</div><div class="kc-tags"><span class="kt t">工具相关</span></div></a></div>
     </div>
   </div>
 
   <!-- LAYER 03 -->
   <div class="layer-block">
-    <div class="layer-head">
+    <div class="layer-hd">
       <div class="layer-id">LAYER 03</div>
-      <div class="layer-title">计算摄影</div>
-      <div class="layer-count">4 pages</div>
-      <div class="lbs done">已完成</div>
+      <div class="layer-ttl">计算摄影</div>
+      <div class="layer-cnt">4 pages</div>
+      <div class="lbadge done">已完成</div>
     </div>
-    <div class="card-grid">
-      <div class="t1"><a href="14-noise-source/index.html" class="k-card"><div class="k-card-num">01 · NOISE SOURCE</div><div class="k-card-title">噪点的来源</div><div class="k-card-desc">散粒噪声、暗电流、读出噪声，三种来源三个环节</div><div class="k-card-tags"><span class="k-tag v">完整讲解</span></div></a></div>
-      <div class="t2"><a href="15-snr/index.html" class="k-card"><div class="k-card-num">02 · SNR</div><div class="k-card-title">信噪比与泊松分布</div><div class="k-card-desc">为什么暗部噪点多，叠加为什么有效，ETTR的数学依据</div><div class="k-card-tags"><span class="k-tag v">含数学推导</span></div></a></div>
-      <div class="t3"><a href="16-spatial-denoise/index.html" class="k-card"><div class="k-card-num">03 · DENOISE</div><div class="k-card-title">空域降噪算法</div><div class="k-card-desc">高斯→双边滤波→NLM→BM3D，每步针对上一个问题改进</div><div class="k-card-tags"><span class="k-tag t">工具相关</span></div></a></div>
-      <div class="t4"><a href="17-tone-mapping/index.html" class="k-card"><div class="k-card-num">04 · TONE MAPPING</div><div class="k-card-title">色调映射</div><div class="k-card-desc">HDR动态范围压缩，局部vs全局，Lightroom滑块的本质</div><div class="k-card-tags"><span class="k-tag v">完整讲解</span></div></a></div>
+    <div class="cg">
+      <div class="a1"><a href="14-noise-source/index.html" class="kc"><div class="kc-num">01 · NOISE SOURCE</div><div class="kc-ttl">噪点的来源</div><div class="kc-desc">散粒噪声、暗电流、读出噪声，三种来源三个环节</div><div class="kc-tags"><span class="kt v">完整讲解</span></div></a></div>
+      <div class="a2"><a href="15-snr/index.html" class="kc"><div class="kc-num">02 · SNR</div><div class="kc-ttl">信噪比与泊松分布</div><div class="kc-desc">为什么暗部噪点多，叠加为什么有效，ETTR的数学依据</div><div class="kc-tags"><span class="kt v">含数学推导</span></div></a></div>
+      <div class="a3"><a href="16-spatial-denoise/index.html" class="kc"><div class="kc-num">03 · DENOISE</div><div class="kc-ttl">空域降噪算法</div><div class="kc-desc">高斯→双边滤波→NLM→BM3D，每步针对上一个问题改进</div><div class="kc-tags"><span class="kt t">工具相关</span></div></a></div>
+      <div class="a4"><a href="17-tone-mapping/index.html" class="kc"><div class="kc-num">04 · TONE MAPPING</div><div class="kc-ttl">色调映射</div><div class="kc-desc">HDR动态范围压缩，局部 vs 全局，Lightroom滑块的本质</div><div class="kc-tags"><span class="kt v">完整讲解</span></div></a></div>
     </div>
   </div>
 
   <!-- LAYER 04 -->
   <div class="layer-block">
-    <div class="layer-head">
+    <div class="layer-hd">
       <div class="layer-id">LAYER 04</div>
-      <div class="layer-title">传统机器学习</div>
-      <div class="layer-count">1 page</div>
-      <div class="lbs done">已完成</div>
+      <div class="layer-ttl">传统机器学习</div>
+      <div class="layer-cnt">1 page</div>
+      <div class="lbadge done">已完成</div>
     </div>
-    <div class="card-grid">
-      <div class="t2"><a href="18-ml/index.html" class="k-card"><div class="k-card-num">01 · MACHINE LEARNING</div><div class="k-card-title">传统机器学习</div><div class="k-card-desc">损失函数、梯度下降、分类、过拟合、Mini-batch，深度学习的地基</div><div class="k-card-tags"><span class="k-tag v">完整讲解</span></div></a></div>
+    <div class="cg">
+      <div class="a2"><a href="18-ml/index.html" class="kc"><div class="kc-num">01 · MACHINE LEARNING</div><div class="kc-ttl">传统机器学习</div><div class="kc-desc">损失函数、梯度下降、分类、过拟合、Mini-batch，深度学习的地基</div><div class="kc-tags"><span class="kt v">完整讲解</span></div></a></div>
     </div>
   </div>
 
   <!-- LAYER 05 -->
   <div class="layer-block">
-    <div class="layer-head">
+    <div class="layer-hd">
       <div class="layer-id">LAYER 05</div>
-      <div class="layer-title">深度学习</div>
-      <div class="layer-count">1 page · 更新中</div>
-      <div class="lbs active">学习中</div>
+      <div class="layer-ttl">深度学习</div>
+      <div class="layer-cnt">1 page · 更新中</div>
+      <div class="lbadge active">学习中</div>
     </div>
-    <div class="card-grid">
-      <div class="t3"><a href="19-cnn/index.html" class="k-card"><div class="k-card-num">01 · CNN</div><div class="k-card-title">卷积神经网络</div><div class="k-card-desc">ResNet-50实战，亲眼看到每层特征图，tiger cat 57.9%</div><div class="k-card-tags"><span class="k-tag t">含可视化实验</span><span class="k-tag v">Q&A记录</span></div></a></div>
+    <div class="cg">
+      <div class="a3"><a href="19-cnn/index.html" class="kc"><div class="kc-num">01 · CNN</div><div class="kc-ttl">卷积神经网络</div><div class="kc-desc">ResNet-50实战，亲眼看到每层特征图，tiger cat 57.9%</div><div class="kc-tags"><span class="kt t">含可视化实验</span><span class="kt v">Q&amp;A记录</span></div></a></div>
     </div>
   </div>
 
 </div>
 
-<div class="site-footer">
-  <div class="footer-left">图像处理知识库 · ARW Stacker 工具开发配套笔记</div>
-  <div class="footer-right">持续更新中</div>
+<div class="ft">
+  <div class="ft-l">图像处理知识库 · ARW Stacker 工具开发配套笔记</div>
+  <div class="ft-r">持续更新中</div>
 </div>
 </body>
 </html>
