@@ -254,3 +254,4 @@ body{
   .nav{padding:0 20px;}
   .resource-grid{grid-template-columns:1fr;}
 }
+body.light .nav{background:rgba(245,243,239,0.95);border-bottom-color:var(--border2);}
